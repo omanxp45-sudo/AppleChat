@@ -36,8 +36,6 @@ html, body {
     box-shadow: 0 0 24px rgba(0,0,0,0.18);
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
-    position: relative;
-    overflow: hidden;
 }
 @supports (height: 100dvh) { .chat-shell { height: 100dvh; } }
 
@@ -174,9 +172,17 @@ html, body {
     text-align: center;
 }
 
+/* ── Chat body wrapper (contains messages + GoLive) ──────────────────────── */
+.chat-body-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+}
+
 /* ── Chat messages area ──────────────────────────────────────────────────── */
 .chat-body {
-    flex: 1;
+    height: 100%;
     overflow-y: auto;
     padding: 10px 10px 4px;
     display: flex;
@@ -659,16 +665,15 @@ html, body {
 .crop-btn.secondary { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
 .crop-btn:active { opacity: 0.8; }
 
-/* ── GoLive modal (inside chat shell) ────────────────────────────────────── */
+/* ── GoLive panel (confined to chat body area) ───────────────────────────── */
 .golive-overlay {
     display: none;
     position: absolute; inset: 0;
     background: #000;
-    z-index: 500;
+    z-index: 100;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-radius: inherit;
 }
 .golive-overlay.show { display: flex; }
 .golive-top {
@@ -751,8 +756,22 @@ html, body {
     <!-- Status / connection bar -->
     <div class="status-bar" id="dbStatus">Connecting…</div>
 
-    <!-- Messages -->
-    <div class="chat-body" id="conDivID"></div>
+    <!-- Messages + GoLive panel -->
+    <div class="chat-body-wrap">
+        <div class="chat-body" id="conDivID"></div>
+
+        <!-- GoLive panel (confined to chat body area) -->
+        <div class="golive-overlay" id="goliveOverlay">
+            <video id="liveVideo" autoplay muted playsinline></video>
+            <div class="golive-top">
+                <div class="golive-badge"><span class="golive-dot"></span>LIVE</div>
+                <div class="golive-close-btn" onclick="stopGoLive()">&#215;</div>
+            </div>
+            <div class="golive-bottom">
+                <div class="golive-username-badge" id="goliveUsername"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Hidden inputs -->
     <input type="hidden" id="baseimage">
@@ -921,17 +940,6 @@ html, body {
 
     </div>
 
-    <!-- GoLive panel (inside chat shell) -->
-    <div class="golive-overlay" id="goliveOverlay">
-        <video id="liveVideo" autoplay muted playsinline></video>
-        <div class="golive-top">
-            <div class="golive-badge"><span class="golive-dot"></span>LIVE</div>
-            <div class="golive-close-btn" onclick="stopGoLive()">&#215;</div>
-        </div>
-        <div class="golive-bottom">
-            <div class="golive-username-badge" id="goliveUsername"></div>
-        </div>
-    </div>
 
 </div>
 
