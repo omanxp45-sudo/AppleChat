@@ -36,6 +36,8 @@ html, body {
     box-shadow: 0 0 24px rgba(0,0,0,0.18);
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
+    position: relative;
+    overflow: hidden;
 }
 @supports (height: 100dvh) { .chat-shell { height: 100dvh; } }
 
@@ -657,15 +659,16 @@ html, body {
 .crop-btn.secondary { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
 .crop-btn:active { opacity: 0.8; }
 
-/* ── GoLive modal ────────────────────────────────────────────────────────── */
+/* ── GoLive modal (inside chat shell) ────────────────────────────────────── */
 .golive-overlay {
     display: none;
-    position: fixed; inset: 0;
+    position: absolute; inset: 0;
     background: #000;
-    z-index: 8000;
+    z-index: 500;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    border-radius: inherit;
 }
 .golive-overlay.show { display: flex; }
 .golive-top {
@@ -917,6 +920,19 @@ html, body {
         </button>
 
     </div>
+
+    <!-- GoLive panel (inside chat shell) -->
+    <div class="golive-overlay" id="goliveOverlay">
+        <video id="liveVideo" autoplay muted playsinline></video>
+        <div class="golive-top">
+            <div class="golive-badge"><span class="golive-dot"></span>LIVE</div>
+            <div class="golive-close-btn" onclick="stopGoLive()">&#215;</div>
+        </div>
+        <div class="golive-bottom">
+            <div class="golive-username-badge" id="goliveUsername"></div>
+        </div>
+    </div>
+
 </div>
 
 <audio id="myAudio1"><source src="../ApplesChat-1/Media/Sounds/message_sent_sound.mp3" type="audio/mpeg"></audio>
@@ -940,18 +956,6 @@ html, body {
         <button class="crop-btn secondary" onclick="resetCrop()">Reset</button>
         <button class="crop-btn primary"   onclick="applyCrop()">&#10003; Send</button>
         <button class="crop-btn secondary" onclick="cancelCrop()">Cancel</button>
-    </div>
-</div>
-
-<!-- GoLive overlay -->
-<div class="golive-overlay" id="goliveOverlay">
-    <video id="liveVideo" autoplay muted playsinline></video>
-    <div class="golive-top">
-        <div class="golive-badge"><span class="golive-dot"></span>LIVE</div>
-        <div class="golive-close-btn" onclick="stopGoLive()">&#215;</div>
-    </div>
-    <div class="golive-bottom">
-        <div class="golive-username-badge" id="goliveUsername"></div>
     </div>
 </div>
 
@@ -1439,12 +1443,10 @@ function startGoLive() {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
         .then(function (stream) {
             _liveStream = stream;
-            var vid = document.getElementById('liveVideo');
-            vid.srcObject = stream;
+            document.getElementById('liveVideo').srcObject = stream;
             document.getElementById('goliveUsername').textContent =
                 '📍 ' + (localStorage.getItem('myUserName') || 'You');
             document.getElementById('goliveOverlay').classList.add('show');
-            document.body.style.overflow = 'hidden';
         })
         .catch(function () { setStatus('Camera access denied.'); });
 }
@@ -1452,7 +1454,6 @@ function stopGoLive() {
     if (_liveStream) { _liveStream.getTracks().forEach(function (t) { t.stop(); }); _liveStream = null; }
     document.getElementById('liveVideo').srcObject = null;
     document.getElementById('goliveOverlay').classList.remove('show');
-    document.body.style.overflow = '';
 }
 </script>
 
