@@ -666,67 +666,75 @@ html, body {
 .crop-btn.secondary { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
 .crop-btn:active { opacity: 0.8; }
 
-/* ── GoLive panel (confined to chat body area) ───────────────────────────── */
-.golive-overlay {
+/* ── GoLive PiP card (same size as sent image) ───────────────────────────── */
+.golive-pip {
     display: none;
-    position: absolute; inset: 0;
-    background: #000;
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 220px;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.35), 0 0 0 2.5px rgba(231,76,60,0.55);
     z-index: 100;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    background: #000;
+    aspect-ratio: 4/3;
 }
-.golive-overlay.show { display: flex; }
-.golive-top {
+.golive-pip.show { display: block; }
+#liveVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.golive-pip-top {
     position: absolute; top: 0; left: 0; right: 0;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+    padding: 5px 6px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
     z-index: 2;
 }
 .golive-badge {
     background: #e74c3c;
     color: #fff;
-    font-size: 13px;
+    font-size: 9px;
     font-weight: 800;
-    padding: 5px 14px;
-    border-radius: 20px;
-    letter-spacing: 1.5px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    letter-spacing: 1.2px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 .golive-dot {
-    width: 8px; height: 8px;
+    width: 6px; height: 6px;
     background: #fff;
     border-radius: 50%;
     animation: pulse 1s infinite;
+    flex-shrink: 0;
 }
 .golive-close-btn {
     color: #fff;
-    font-size: 26px;
+    font-size: 16px;
     cursor: pointer;
-    width: 38px; height: 38px;
+    width: 22px; height: 22px;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(255,255,255,0.18);
+    background: rgba(0,0,0,0.4);
     border-radius: 50%;
     line-height: 1;
     -webkit-tap-highlight-color: transparent;
 }
-#liveVideo {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    position: absolute; inset: 0;
-}
-.golive-bottom {
-    position: absolute; bottom: 24px; left: 16px; z-index: 2;
+.golive-pip-bottom {
+    position: absolute; bottom: 5px; left: 7px; right: 7px; z-index: 2;
 }
 .golive-username-badge {
     color: #fff;
-    font-size: 15px;
+    font-size: 10px;
     font-weight: 700;
-    text-shadow: 0 1px 8px rgba(0,0,0,0.8);
-    display: flex; align-items: center; gap: 6px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 </style>
 </head>
@@ -761,14 +769,14 @@ html, body {
     <div class="chat-body-wrap">
         <div class="chat-body" id="conDivID"></div>
 
-        <!-- GoLive panel (confined to chat body area) -->
-        <div class="golive-overlay" id="goliveOverlay">
+        <!-- GoLive PiP card -->
+        <div class="golive-pip" id="goliveOverlay">
             <video id="liveVideo" autoplay muted playsinline></video>
-            <div class="golive-top">
+            <div class="golive-pip-top">
                 <div class="golive-badge"><span class="golive-dot"></span>LIVE</div>
                 <div class="golive-close-btn" onclick="stopGoLive()">&#215;</div>
             </div>
-            <div class="golive-bottom">
+            <div class="golive-pip-bottom">
                 <div class="golive-username-badge" id="goliveUsername"></div>
             </div>
         </div>
