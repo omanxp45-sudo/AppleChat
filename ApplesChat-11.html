@@ -1092,6 +1092,12 @@ window.onload = function () {
         this.classList.toggle('open', isOpen);
     });
 
+    // Reply icon — event delegation (works for all dynamically added messages)
+    $(document).on('click', '.reply-icon', function (e) {
+        e.stopPropagation();
+        startReply($(this).attr('data-uname'), $(this).attr('data-preview'));
+    });
+
     // Close tray + sticker menu on outside click
     document.addEventListener('click', function () {
         document.getElementById('stickerMenu').classList.remove('show');
@@ -1187,25 +1193,16 @@ function appendMessage(msg) {
         $row.append($('<img class="msg-avatar">').attr('src', msg.avatar));
     }
     if (!isMe) {
-        var previewText = msg.message ? msg.message.slice(0, 60) : (msg.image_data ? '📷 Image' : msg.sticker_url ? '😊 Sticker' : msg.audio_data ? '🎤 Voice' : '');
+        var previewText = msg.message ? msg.message.slice(0, 60)
+            : (msg.image_data ? '📷 Image' : msg.sticker_url ? '😊 Sticker' : msg.audio_data ? '🎤 Voice' : '');
         var $nameRow = $('<div class="msg-username">');
         $nameRow.append(document.createTextNode(msg.username));
+        // Store data on element — click handled by delegation below
         var $replyBtn = $('<span class="reply-icon" title="Reply">');
-        $replyBtn.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="13" height="13" fill="rgba(255,255,255,0.85)"><path d="M7.5 4L2 9l5.5 5V11c4.5 0 7.5 1.5 9 5-0.5-5-3.5-9-9-9V4z"/></svg>');
-        $replyBtn.on('click', function(e) {
-            e.stopPropagation();
-            startReply(msg.username, previewText);
-        });
+        $replyBtn.attr('data-uname', msg.username).attr('data-preview', previewText);
+        $replyBtn.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="15" height="15" fill="rgba(255,255,255,0.9)"><path d="M7.5 4L2 9l5.5 5V11c4.5 0 7.5 1.5 9 5-0.5-5-3.5-9-9-9V4z"/></svg>');
         $nameRow.append($replyBtn);
         $wrap.append($nameRow);
-    }
-
-    // Show reply quote if this message is a reply
-    if (msg.reply_to && msg.reply_to.username) {
-        var $quote = $('<div class="reply-quote">');
-        $quote.append('<div class="reply-quote-name">↩ ' + escapeHtml(msg.reply_to.username) + '</div>');
-        $quote.append('<div class="reply-quote-text">' + escapeHtml(msg.reply_to.text || '') + '</div>');
-        $bubble.prepend($quote);
     }
 
     if (msg.sticker_url) {
@@ -1227,7 +1224,19 @@ function appendMessage(msg) {
         }
     }
 
-    if (isMedia) {
+    // Reply quote — added after media check so bubble-media never hides it
+    if (msg.reply_to && msg.reply_to.username) {
+        if (isMedia) {
+            // For media-only messages, add quote BEFORE the media element, keep background
+            $bubble.removeClass('bubble-media');
+            $bubble.css({ padding: '7px 10px 10px', background: '', boxShadow: '' });
+            isMedia = false;
+        }
+        var $quote = $('<div class="reply-quote">');
+        $quote.append('<div class="reply-quote-name">↩ ' + escapeHtml(msg.reply_to.username) + '</div>');
+        $quote.append('<div class="reply-quote-text">' + escapeHtml(msg.reply_to.text || '') + '</div>');
+        $bubble.prepend($quote);
+    } else if (isMedia) {
         $bubble.addClass('bubble-media');
     }
 
