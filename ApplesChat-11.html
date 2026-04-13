@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="description" content="ApplesChat — free real-time chat">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
@@ -18,15 +21,22 @@ html, body {
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #f0f2f5;
+    /* Prevent bounce/overscroll on iOS */
+    overscroll-behavior: none;
 }
 
 .chat-shell {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    /* dvh handles iOS Safari keyboard + address bar correctly */
+    height: 100dvh;
+    height: 100vh; /* fallback for older browsers */
     max-width: 600px;
     margin: 0 auto;
     box-shadow: 0 0 20px rgba(0,0,0,0.15);
+    /* Safe area insets for notched phones */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
@@ -107,13 +117,15 @@ html, body {
 .chat-body::-webkit-scrollbar { width: 4px; }
 .chat-body::-webkit-scrollbar-track { background: transparent; }
 .chat-body::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+/* Smooth momentum scrolling on iOS */
+.chat-body { -webkit-overflow-scrolling: touch; }
 
 /* ── Message rows ────────────────────────────────────────────────────────── */
 .msg-row {
     display: flex;
     align-items: flex-end;
     gap: 7px;
-    max-width: 78%;
+    max-width: 85%;
     animation: fadeIn 0.2s ease;
 }
 
@@ -288,6 +300,8 @@ html, body {
     background: #fff;
     border-top: 1px solid #e0e0e0;
     padding: 8px 10px;
+    /* Extra bottom padding for home-bar on iPhone */
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
     display: flex;
     align-items: center;
     gap: 6px;
@@ -298,11 +312,14 @@ html, body {
     flex: 1;
     border: 1px solid #ddd;
     border-radius: 22px;
-    padding: 9px 16px;
-    font-size: 14px;
+    padding: 10px 16px;
+    /* 16px prevents iOS from zooming in on focus */
+    font-size: 16px;
     outline: none;
     background: #f5f5f5;
     transition: border-color 0.2s, background 0.2s;
+    /* Prevent double-tap zoom on input */
+    touch-action: manipulation;
 }
 
 #myInput:focus {
@@ -311,8 +328,9 @@ html, body {
 }
 
 .icon-btn {
-    width: 38px;
-    height: 38px;
+    /* 44px minimum touch target (Apple HIG) */
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: none;
     background: transparent;
@@ -325,13 +343,17 @@ html, body {
     flex-shrink: 0;
     transition: background 0.15s, color 0.15s;
     padding: 0;
+    /* Remove tap highlight on mobile */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .icon-btn:hover { background: #f0f0f0; color: #c0392b; }
+.icon-btn:active { background: #e8e8e8; }
 
 .send-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: none;
     background: #e74c3c;
@@ -344,9 +366,12 @@ html, body {
     flex-shrink: 0;
     transition: background 0.15s, transform 0.1s;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .send-btn:hover { background: #c0392b; transform: scale(1.05); }
+.send-btn:active { background: #c0392b; transform: scale(0.95); }
 
 /* ── Sticker picker ──────────────────────────────────────────────────────── */
 .sticker-btn-group {
@@ -354,18 +379,20 @@ html, body {
 }
 
 .sticker-btn-group .dropdown-menu {
-    bottom: 48px;
+    bottom: 52px;
     top: auto;
-    left: -60px;
-    width: 220px;
+    left: 0;
+    width: min(220px, calc(100vw - 24px));
     max-height: 220px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: none;
     flex-wrap: wrap;
     padding: 8px;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     border: 1px solid #eee;
+    z-index: 100;
 }
 
 .sticker-btn-group .dropdown-menu.show { display: flex; }
@@ -382,6 +409,28 @@ html, body {
 
 .sticker-btn-group .dropdown-item.sticker:hover { background: #f5f5f5; }
 .sticker-btn-group .dropdown-item.sticker img { width: 26px; height: 26px; }
+
+/* ── Mobile tweaks ───────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .chat-shell {
+        max-width: 100%;
+        box-shadow: none;
+    }
+    .chat-header { padding: 8px 12px; }
+    .chat-header .app-title { font-size: 18px; }
+    .chat-body { padding: 10px 8px; }
+    .msg-row { max-width: 90%; }
+    .bubble { font-size: 15px; }
+    .online-bar { padding: 5px 10px; min-height: 50px; }
+    .chat-input-bar { padding: 6px 8px; padding-bottom: max(6px, env(safe-area-inset-bottom)); gap: 4px; }
+    .icon-btn { width: 40px; height: 40px; font-size: 22px; }
+    .send-btn { width: 42px; height: 42px; }
+}
+
+/* Use dynamic viewport height where supported (fixes iOS keyboard) */
+@supports (height: 100dvh) {
+    .chat-shell { height: 100dvh; }
+}
 </style>
 </head>
 <body>

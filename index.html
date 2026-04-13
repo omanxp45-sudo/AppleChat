@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="description" content="Universal and confidential chat, where you can communicate with others, privately or publicly">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
 <title>ApplesChat</title>
 <link rel="shortcut icon" href="https://imgur.com/57AweD4.png">
@@ -18,7 +20,7 @@
     margin: 20px auto;
     border: 3px solid red;
     padding: 15px;
-    width: 320px;
+    width: min(320px, calc(100% - 24px));
     background-color: lightblue;
     box-shadow: 10px 10px 8px red;
 }
@@ -47,6 +49,9 @@
     padding: 5px 8px;
     margin-top: 4px;
     box-sizing: border-box;
+    /* Prevent iOS zoom on focus */
+    font-size: 16px;
+    touch-action: manipulation;
 }
 #myUserName { color: red; }
 label { font-weight: bold; }
