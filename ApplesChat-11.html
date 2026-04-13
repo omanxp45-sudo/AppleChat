@@ -769,7 +769,7 @@ html, body {
     <div class="chat-body-wrap">
         <div class="chat-body" id="conDivID"></div>
 
-        <!-- GoLive PiP card -->
+        <!-- GoLive PiP card (streamer view) -->
         <div class="golive-pip" id="goliveOverlay">
             <video id="liveVideo" autoplay muted playsinline></video>
             <div class="golive-pip-top">
@@ -778,6 +778,17 @@ html, body {
             </div>
             <div class="golive-pip-bottom">
                 <div class="golive-username-badge" id="goliveUsername"></div>
+            </div>
+        </div>
+
+        <!-- Viewer PiP card (shown to other chatters) -->
+        <div class="golive-pip" id="viewerPip" style="bottom:12px;left:12px;display:none;">
+            <img id="liveFrame" style="width:220px;height:165px;object-fit:cover;display:block;" alt="Live">
+            <div class="golive-pip-top">
+                <div class="golive-badge"><span class="golive-dot"></span>LIVE</div>
+            </div>
+            <div class="golive-pip-bottom">
+                <div class="golive-username-badge" id="viewerLiveUsername"></div>
             </div>
         </div>
     </div>
@@ -1052,6 +1063,7 @@ window.onload = function () {
 
     connectFirebase();
     heartbeat();
+    listenLiveStream();
     setInterval(heartbeat, 30000);
     listenOnlineUsers();
 };
@@ -1451,7 +1463,7 @@ function cancelCrop() {
 }
 
 // ── GoLive ────────────────────────────────────────────────────────────────────
-var _liveStream = null;
+var _liveStream = null, _liveInterval = null;
 
 function startGoLive() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -1461,16 +1473,56 @@ function startGoLive() {
         .then(function (stream) {
             _liveStream = stream;
             document.getElementById('liveVideo').srcObject = stream;
-            document.getElementById('goliveUsername').textContent =
-                '📍 ' + (localStorage.getItem('myUserName') || 'You');
+            var username = localStorage.getItem('myUserName') || 'You';
+            document.getElementById('goliveUsername').textContent = '📍 ' + username;
             document.getElementById('goliveOverlay').classList.add('show');
+            // Remove from Firebase if user disconnects unexpectedly
+            try { firebase.database().ref('live').onDisconnect().remove(); } catch(e) {}
+            // Broadcast first frame after camera warms up, then every 2s
+            setTimeout(captureAndBroadcast, 800);
+            _liveInterval = setInterval(captureAndBroadcast, 2000);
         })
         .catch(function () { setStatus('Camera access denied.'); });
 }
+
+function captureAndBroadcast() {
+    var video = document.getElementById('liveVideo');
+    if (!video || !_liveStream) return;
+    try {
+        var canvas = document.createElement('canvas');
+        canvas.width = 320; canvas.height = 240;
+        canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
+        firebase.database().ref('live').set({
+            username: localStorage.getItem('myUserName') || '',
+            frame: canvas.toDataURL('image/jpeg', 0.45),
+            ts: firebase.database.ServerValue.TIMESTAMP
+        });
+    } catch(e) {}
+}
+
 function stopGoLive() {
+    if (_liveInterval) { clearInterval(_liveInterval); _liveInterval = null; }
     if (_liveStream) { _liveStream.getTracks().forEach(function (t) { t.stop(); }); _liveStream = null; }
     document.getElementById('liveVideo').srcObject = null;
     document.getElementById('goliveOverlay').classList.remove('show');
+    try { firebase.database().ref('live').remove(); } catch(e) {}
+}
+
+function listenLiveStream() {
+    try {
+        firebase.database().ref('live').on('value', function (snapshot) {
+            var data = snapshot.val();
+            var me = localStorage.getItem('myUserName') || '';
+            var pip = document.getElementById('viewerPip');
+            if (data && data.frame && data.username && data.username !== me) {
+                document.getElementById('liveFrame').src = data.frame;
+                document.getElementById('viewerLiveUsername').textContent = '📍 ' + data.username;
+                pip.style.display = 'block';
+            } else {
+                pip.style.display = 'none';
+            }
+        });
+    } catch(e) {}
 }
 </script>
 
