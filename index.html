@@ -177,22 +177,27 @@ label { font-weight: bold; }
 
         setMsg('Connecting…');
 
-        // Save profile to Firebase Realtime Database
-        var db = firebase.database();
-        db.ref('users/' + username).set({
-            username:  username,
-            status:    status,
-            avatar:    avatar,
-            lastSeen:  firebase.database.ServerValue.TIMESTAMP
-        })
-        .then(function () {
+        // Save profile to Firebase, then redirect.
+        // Wrapped in try-catch so a misconfigured Firebase never blocks entry.
+        try {
+            var db = firebase.database();
+            db.ref('users/' + username).set({
+                username:  username,
+                status:    status,
+                avatar:    avatar,
+                lastSeen:  firebase.database.ServerValue.TIMESTAMP
+            })
+            .then(function () {
+                window.location.href = 'ApplesChat-11.html';
+            })
+            .catch(function (err) {
+                console.warn('Firebase write failed:', err.message);
+                window.location.href = 'ApplesChat-11.html';
+            });
+        } catch (err) {
+            console.warn('Firebase error:', err.message);
             window.location.href = 'ApplesChat-11.html';
-        })
-        .catch(function (err) {
-            // Firebase not configured yet? Still let the user in.
-            console.warn('Firebase write failed:', err.message);
-            window.location.href = 'ApplesChat-11.html';
-        });
+        }
     }
 
     // Allow Enter key to submit

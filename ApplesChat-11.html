@@ -326,31 +326,36 @@ window.onload = function () {
 
 // ── Firebase real-time listener ───────────────────────────────────────────────
 function connectFirebase() {
-    var db  = firebase.database();
-    // Load last 50 messages, then listen for every new one
-    var ref = db.ref('messages').orderByChild('created_at').limitToLast(50);
+    try {
+        var db  = firebase.database();
+        // Load last 50 messages, then listen for every new one
+        var ref = db.ref('messages').orderByChild('created_at').limitToLast(50);
 
-    ref.once('value', function (snapshot) {
-        // Initial batch — render in chronological order
-        var rows = [];
-        snapshot.forEach(function (child) { rows.push(child.val()); });
-        rows.forEach(appendMessage);
-        scrollToBottom();
-        setStatus('');
-    }, function (err) {
-        setStatus('Firebase error: ' + err.message + ' — check firebase-config.js');
-    });
+        ref.once('value', function (snapshot) {
+            // Initial batch — render in chronological order
+            var rows = [];
+            snapshot.forEach(function (child) { rows.push(child.val()); });
+            rows.forEach(appendMessage);
+            scrollToBottom();
+            setStatus('');
+        }, function (err) {
+            setStatus('Firebase error: ' + err.message + ' — check firebase-config.js');
+        });
 
-    // New messages arriving after initial load
-    ref.on('child_added', function (snapshot) {
-        // Skip messages already rendered by the initial once() call
-        if (!initialLoadDone) return;
-        appendMessage(snapshot.val());
-        scrollToBottom();
-    });
+        // New messages arriving after initial load
+        ref.on('child_added', function (snapshot) {
+            // Skip messages already rendered by the initial once() call
+            if (!initialLoadDone) return;
+            appendMessage(snapshot.val());
+            scrollToBottom();
+        });
 
-    // Mark initial load complete after a tick
-    setTimeout(function () { initialLoadDone = true; }, 500);
+        // Mark initial load complete after a tick
+        setTimeout(function () { initialLoadDone = true; }, 500);
+    } catch (err) {
+        setStatus('Firebase not configured — add your keys to firebase-config.js');
+        console.warn('Firebase init error:', err.message);
+    }
 }
 
 var initialLoadDone = false;
@@ -448,10 +453,14 @@ function postToFirebase(extra) {
         created_at: firebase.database.ServerValue.TIMESTAMP
     }, extra);
 
-    firebase.database().ref('messages').push(payload)
-        .catch(function (err) {
-            setStatus('Send failed: ' + err.message);
-        });
+    try {
+        firebase.database().ref('messages').push(payload)
+            .catch(function (err) {
+                setStatus('Send failed: ' + err.message);
+            });
+    } catch (err) {
+        setStatus('Firebase not configured — add your keys to firebase-config.js');
+    }
 }
 
 // ── Clear local view (messages stay in Firebase) ─────────────────────────────
