@@ -164,12 +164,20 @@ html, body {
 }
 .online-user-name {
     font-size: 9px;
-    color: #777;
+    color: #555;
+    font-weight: 600;
     max-width: 40px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     text-align: center;
+}
+.online-user-status {
+    font-size: 8px;
+    color: #25d366;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.3px;
 }
 
 /* ── Chat body wrapper (contains messages + GoLive) ──────────────────────── */
@@ -617,6 +625,36 @@ html, body {
     50% { box-shadow: 0 0 0 4px rgba(46,204,113,0.15); }
 }
 
+/* ── Header subtitle (online count + connection) ─────────────────────────── */
+.header-subtitle {
+    font-size: 11px;
+    color: rgba(255,255,255,0.82);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1;
+}
+.header-conn-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #2ecc71;
+    flex-shrink: 0;
+    transition: background 0.4s;
+}
+.header-conn-dot.connecting { background: #f39c12; animation: pulse 1s infinite; }
+.header-conn-dot.offline    { background: #e74c3c; }
+
+/* ── Online status dot inside username badge ─────────────────────────────── */
+.badge-status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #2ecc71;
+    border: 1.5px solid rgba(255,255,255,0.7);
+    flex-shrink: 0;
+    display: inline-block;
+}
+.badge-status-dot.offline { background: #bbb; }
+
 /* ── Sent images: red fade frame ─────────────────────────────────────────── */
 .msg-row.me .chat-upload {
     border: 2px solid rgba(231,76,60,0.5);
@@ -790,7 +828,10 @@ html, body {
         <img class="logo" src="https://imgur.com/57AweD4.png" alt="ApplesChat">
         <div class="header-info">
             <span class="app-title">ApplesChat</span>
-            <span class="header-subtitle" id="onlineCount"></span>
+            <span class="header-subtitle">
+                <span class="header-conn-dot connecting" id="connDot"></span>
+                <span id="onlineCount">Connecting…</span>
+            </span>
         </div>
         <a class="header-user" href="index.html" title="Edit profile">
             <img class="header-avatar" id="avatar" src="https://imgur.com/PVBYWRJ.png" alt="Avatar">
@@ -1203,6 +1244,11 @@ function appendMessage(msg) {
         var avatarSrc = msg.avatar || 'https://imgur.com/PVBYWRJ.png';
         $nameRow.append($('<img class="badge-avatar">').attr('src', avatarSrc).attr('alt', ''));
         $nameRow.append(document.createTextNode(msg.username));
+        // Online status dot
+        var isOnline = _onlineSet.has(msg.username);
+        var $statusDot = $('<span class="badge-status-dot">').attr('data-for', msg.username);
+        if (!isOnline) $statusDot.addClass('offline');
+        $nameRow.append($statusDot);
         // Reply icon — inline onclick for maximum reliability on mobile
         var $replyBtn = $('<span class="reply-icon" title="Reply">');
         $replyBtn.attr('onclick', '_doReply("' + rid + '"); event.stopPropagation();');
@@ -1269,6 +1315,16 @@ function setStatus(text) {
     var el = document.getElementById('dbStatus');
     el.textContent = text;
     el.style.display = text ? 'block' : 'none';
+    // Reflect connection state in header dot
+    var connDot = document.getElementById('connDot');
+    if (!connDot) return;
+    if (!text) {
+        connDot.className = 'header-conn-dot'; // green connected
+    } else if (text.toLowerCase().includes('error') || text.toLowerCase().includes('fail') || text.toLowerCase().includes('not configured')) {
+        connDot.className = 'header-conn-dot offline';
+    } else {
+        connDot.className = 'header-conn-dot connecting';
+    }
 }
 
 // ── Reply ─────────────────────────────────────────────────────────────────────
@@ -1394,6 +1450,8 @@ function heartbeat() {
     } catch (e) {}
 }
 
+var _onlineSet = new Set(); // usernames currently online
+
 function listenOnlineUsers() {
     try {
         firebase.database().ref('users').on('value', function (snapshot) {
@@ -1403,32 +1461,52 @@ function listenOnlineUsers() {
             var now = Date.now(), threshold = 3 * 60 * 1000, count = 0;
             var me = localStorage.getItem('myUserName') || '';
             var liveUser = null;
+            var newOnlineSet = new Set();
 
             snapshot.forEach(function (child) {
                 var user = child.val();
                 if (!user || !user.lastSeen || now - user.lastSeen > threshold) return;
                 count++;
+                newOnlineSet.add(user.username);
 
                 var wrap    = document.createElement('div');   wrap.className = 'online-user';
                 var imgWrap = document.createElement('div');   imgWrap.className = 'online-user-wrap';
-                var img     = document.createElement('img');   img.src = user.avatar || 'https://imgur.com/PVBYWRJ.png'; img.alt = user.username;
+                var img     = document.createElement('img');
+                img.src = user.avatar || 'https://imgur.com/PVBYWRJ.png';
+                img.alt = user.username;
                 var dot     = document.createElement('span');  dot.className = 'online-dot';
-                var name    = document.createElement('div');   name.className = 'online-user-name'; name.textContent = user.username;
+                var name    = document.createElement('div');   name.className = 'online-user-name';
+                name.textContent = user.username;
+                // Status label under name
+                var statusLbl = document.createElement('div');
+                statusLbl.className = 'online-user-status';
+                statusLbl.textContent = 'Online';
 
                 imgWrap.appendChild(img);
                 imgWrap.appendChild(dot);
                 wrap.appendChild(imgWrap);
                 wrap.appendChild(name);
+                wrap.appendChild(statusLbl);
                 bar.appendChild(wrap);
 
-                // Check for live stream from another user
                 if (user.isLive && user.liveFrame && user.username !== me) {
                     liveUser = user;
                 }
             });
 
-            var sub = document.getElementById('onlineCount');
-            if (sub) sub.textContent = count > 0 ? count + ' online' : '';
+            _onlineSet = newOnlineSet;
+
+            // Update all badge status dots in the chat
+            document.querySelectorAll('.badge-status-dot').forEach(function (el) {
+                var uname = el.getAttribute('data-for');
+                el.classList.toggle('offline', !_onlineSet.has(uname));
+            });
+
+            // Update header connection indicator
+            var connDot = document.getElementById('connDot');
+            var countEl = document.getElementById('onlineCount');
+            if (connDot) { connDot.className = 'header-conn-dot'; } // green = connected
+            if (countEl) countEl.textContent = count > 0 ? count + (count === 1 ? ' online' : ' online') : 'No one online';
 
             // Show / hide viewer PiP
             var pip = document.getElementById('viewerPip');
