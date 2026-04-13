@@ -1063,7 +1063,6 @@ window.onload = function () {
 
     connectFirebase();
     heartbeat();
-    listenLiveStream();
     setInterval(heartbeat, 30000);
     listenOnlineUsers();
 };
@@ -1302,6 +1301,8 @@ function listenOnlineUsers() {
             bar.querySelectorAll('.online-user').forEach(function (el) { el.remove(); });
 
             var now = Date.now(), threshold = 3 * 60 * 1000, count = 0;
+            var me = localStorage.getItem('myUserName') || '';
+            var liveUser = null;
 
             snapshot.forEach(function (child) {
                 var user = child.val();
@@ -1319,10 +1320,25 @@ function listenOnlineUsers() {
                 wrap.appendChild(imgWrap);
                 wrap.appendChild(name);
                 bar.appendChild(wrap);
+
+                // Check for live stream from another user
+                if (user.isLive && user.liveFrame && user.username !== me) {
+                    liveUser = user;
+                }
             });
 
             var sub = document.getElementById('onlineCount');
-            if (sub) sub.textContent = count > 0 ? count + (count === 1 ? ' online' : ' online') : '';
+            if (sub) sub.textContent = count > 0 ? count + ' online' : '';
+
+            // Show / hide viewer PiP
+            var pip = document.getElementById('viewerPip');
+            if (liveUser) {
+                document.getElementById('liveFrame').src = liveUser.liveFrame;
+                document.getElementById('viewerLiveUsername').textContent = '📍 ' + liveUser.username;
+                pip.style.display = 'block';
+            } else {
+                pip.style.display = 'none';
+            }
         });
     } catch (e) {}
 }
@@ -1490,19 +1506,18 @@ function startGoLive() {
 
 function captureAndBroadcast() {
     var video = document.getElementById('liveVideo');
-    if (!video || !_liveStream) return;
+    // readyState 2 = HAVE_CURRENT_DATA, video is playing
+    if (!video || !_liveStream || video.readyState < 2) return;
     var username = localStorage.getItem('myUserName') || '';
-    try {
-        var canvas = document.createElement('canvas');
-        canvas.width = 320; canvas.height = 240;
-        canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
-        // Write into users/ node — same path as heartbeat, guaranteed writable
-        firebase.database().ref('users/' + username).update({
-            isLive: true,
-            liveFrame: canvas.toDataURL('image/jpeg', 0.45),
-            lastSeen: firebase.database.ServerValue.TIMESTAMP
-        });
-    } catch(e) {}
+    var canvas = document.createElement('canvas');
+    canvas.width = 160; canvas.height = 120;
+    try { canvas.getContext('2d').drawImage(video, 0, 0, 160, 120); } catch(e) { return; }
+    var frame = canvas.toDataURL('image/jpeg', 0.3); // ~2-4KB per frame
+    firebase.database().ref('users/' + username).update({
+        isLive: true,
+        liveFrame: frame,
+        lastSeen: firebase.database.ServerValue.TIMESTAMP
+    }).catch(function(e) { setStatus('Live error: ' + e.message); });
 }
 
 function stopGoLive() {
@@ -1516,29 +1531,6 @@ function stopGoLive() {
     } catch(e) {}
 }
 
-function listenLiveStream() {
-    try {
-        // Reuse the users/ node — same listener as online users, no new Firebase path needed
-        firebase.database().ref('users').on('value', function (snapshot) {
-            var me = localStorage.getItem('myUserName') || '';
-            var pip = document.getElementById('viewerPip');
-            var found = null;
-            snapshot.forEach(function (child) {
-                var u = child.val();
-                if (u && u.isLive && u.liveFrame && u.username && u.username !== me) {
-                    found = u;
-                }
-            });
-            if (found) {
-                document.getElementById('liveFrame').src = found.liveFrame;
-                document.getElementById('viewerLiveUsername').textContent = '📍 ' + found.username;
-                pip.style.display = 'block';
-            } else {
-                pip.style.display = 'none';
-            }
-        });
-    } catch(e) {}
-}
 </script>
 
 </body>
