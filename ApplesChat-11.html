@@ -207,6 +207,64 @@ html, body {
     border-radius: 18px;
 }
 
+/* ── Online users bar ───────────────────────────────────────────────────────── */
+.online-bar {
+    background: #fff;
+    border-bottom: 1px solid #e8e8e8;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    min-height: 54px;
+}
+.online-bar::-webkit-scrollbar { height: 0; }
+.online-bar-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+.online-user {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+}
+.online-user-wrap {
+    position: relative;
+}
+.online-user-wrap img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+}
+.online-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 9px;
+    height: 9px;
+    background: #2ecc71;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+.online-user-name {
+    font-size: 9px;
+    color: #777;
+    max-width: 38px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
 /* Mic button */
 .mic-btn {
     color: #b0b8c1;  /* silver */
@@ -338,6 +396,11 @@ html, body {
             <img class="header-avatar" id="avatar" src="https://imgur.com/PVBYWRJ.png" alt="Avatar">
             <span class="header-name" id="myUserName"></span>
         </a>
+    </div>
+
+    <!-- Online users bar -->
+    <div class="online-bar" id="onlineBar">
+        <span class="online-bar-label">Online</span>
     </div>
 
     <!-- Status / connection bar -->
@@ -528,7 +591,16 @@ html, body {
 
         <!-- Clear -->
         <button class="icon-btn" onclick="clearLocalView()" title="Clear chat">
-            &#128465;
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#686868" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Lid -->
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M8 6V4h8v2"/>
+                <!-- Bin body -->
+                <path d="M19 6l-1 14H6L5 6"/>
+                <!-- Inner lines -->
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
         </button>
 
         <!-- Text input -->
@@ -605,6 +677,9 @@ window.onload = function () {
     });
 
     connectFirebase();
+    heartbeat();
+    setInterval(heartbeat, 30000);
+    listenOnlineUsers();
 };
 
 // ── Firebase ──────────────────────────────────────────────────────────────────
@@ -811,6 +886,61 @@ function stopRecording() {
 
 function playMessageSentSound() { document.getElementById('myAudio1').play(); }
 function playClearSound()       { document.getElementById('myAudio2').play(); }
+
+// ── Online presence ───────────────────────────────────────────────────────────
+function heartbeat() {
+    var username = localStorage.getItem('myUserName') || '';
+    var avatar   = localStorage.getItem('avatarImgData') || null;
+    if (!username) return;
+    try {
+        firebase.database().ref('users/' + username).update({
+            username: username,
+            avatar:   avatar,
+            lastSeen: firebase.database.ServerValue.TIMESTAMP
+        });
+    } catch (e) {}
+}
+
+function listenOnlineUsers() {
+    try {
+        firebase.database().ref('users').on('value', function (snapshot) {
+            var bar = document.getElementById('onlineBar');
+            bar.querySelectorAll('.online-user').forEach(function (el) { el.remove(); });
+
+            var now       = Date.now();
+            var threshold = 3 * 60 * 1000; // 3 minutes = online
+
+            snapshot.forEach(function (child) {
+                var user = child.val();
+                if (!user || !user.lastSeen) return;
+                if (now - user.lastSeen > threshold) return;
+
+                var wrap    = document.createElement('div');
+                wrap.className = 'online-user';
+
+                var imgWrap = document.createElement('div');
+                imgWrap.className = 'online-user-wrap';
+
+                var img = document.createElement('img');
+                img.src = user.avatar || 'https://imgur.com/PVBYWRJ.png';
+                img.alt = user.username;
+
+                var dot = document.createElement('span');
+                dot.className = 'online-dot';
+
+                var name = document.createElement('div');
+                name.className = 'online-user-name';
+                name.textContent = user.username;
+
+                imgWrap.appendChild(img);
+                imgWrap.appendChild(dot);
+                wrap.appendChild(imgWrap);
+                wrap.appendChild(name);
+                bar.appendChild(wrap);
+            });
+        });
+    } catch (e) {}
+}
 </script>
 
 </body>
