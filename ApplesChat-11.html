@@ -226,24 +226,27 @@ html, body {
 
 .msg-username {
     font-size: 11px;
-    font-weight: 700;
-    color: #fff;
-    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    font-weight: 600;
+    color: #212529;
+    /* Bootstrap btn-outline-dark + fade gradient border */
+    background: linear-gradient(#fff, #fff) padding-box,
+                linear-gradient(135deg, #343a40 0%, rgba(52,58,64,0.25) 60%, #343a40 100%) border-box;
+    border: 1.5px solid transparent;
     padding: 3px 10px 3px 4px;
-    border-radius: 20px;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
     gap: 5px;
     max-width: fit-content;
     margin-bottom: 2px;
-    box-shadow: 0 1px 4px rgba(176,48,37,0.25);
+    box-shadow: 0 2px 8px rgba(52,58,64,0.15), 0 0 0 0.5px rgba(52,58,64,0.08);
 }
 .badge-avatar {
     width: 22px;
     height: 22px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1.5px solid rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(52,58,64,0.35);
     flex-shrink: 0;
 }
 .badge-name-stack {
@@ -255,13 +258,13 @@ html, body {
 .badge-name-text {
     font-size: 11px;
     font-weight: 700;
-    color: #fff;
+    color: #212529;
     line-height: 1.2;
 }
 .badge-user-status {
     font-size: 9px;
     font-weight: 400;
-    color: rgba(255,255,255,0.8);
+    color: #6c757d;
     font-style: italic;
     line-height: 1.2;
     max-width: 120px;
@@ -271,19 +274,20 @@ html, body {
 }
 .reply-icon {
     cursor: pointer;
-    opacity: 0.9;
+    opacity: 0.85;
     flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 28px;
     min-height: 28px;
-    margin: -4px -6px -4px 0;
+    margin: -4px -8px -4px 0;
     border-radius: 50%;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    transition: opacity 0.12s, background 0.12s;
 }
-.reply-icon:active { opacity: 0.6; }
+.reply-icon:active { opacity: 1; background: rgba(52,58,64,0.1); }
 
 /* ── Bubbles ─────────────────────────────────────────────────────────────── */
 .bubble {
@@ -672,11 +676,11 @@ html, body {
     width: 7px; height: 7px;
     border-radius: 50%;
     background: #2ecc71;
-    border: 1.5px solid rgba(255,255,255,0.7);
+    border: 1.5px solid rgba(52,58,64,0.2);
     flex-shrink: 0;
     display: inline-block;
 }
-.badge-status-dot.offline { background: #bbb; }
+.badge-status-dot.offline { background: #adb5bd; }
 
 /* ── Sent images: red fade frame ─────────────────────────────────────────── */
 .msg-row.me .chat-upload {
@@ -1283,7 +1287,7 @@ function appendMessage(msg) {
         // Reply icon — inline onclick for maximum reliability on mobile
         var $replyBtn = $('<span class="reply-icon" title="Reply">');
         $replyBtn.attr('onclick', '_doReply("' + rid + '"); event.stopPropagation();');
-        $replyBtn.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="16" height="16" fill="rgba(255,255,255,0.95)"><path d="M7.5 4L2 9l5.5 5V11c4.5 0 7.5 1.5 9 5-0.5-5-3.5-9-9-9V4z"/></svg>');
+        $replyBtn.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="16" height="16" fill="rgba(52,58,64,0.75)"><path d="M7.5 4L2 9l5.5 5V11c4.5 0 7.5 1.5 9 5-0.5-5-3.5-9-9-9V4z"/></svg>');
         $nameRow.append($replyBtn);
         $wrap.append($nameRow);
     }
