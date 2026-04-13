@@ -457,37 +457,72 @@ html, body {
 
         <!-- Voice note -->
         <button class="icon-btn mic-btn" id="micBtn" onclick="toggleVoiceRecording()" title="Voice note">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="36" height="36">
                 <defs>
-                    <clipPath id="vmh"><ellipse cx="12" cy="8.5" rx="4.8" ry="5.8"/></clipPath>
-                    <linearGradient id="vsg" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%"   stop-color="#c8c8c8"/>
-                        <stop offset="45%"  stop-color="#f2f2f2"/>
-                        <stop offset="100%" stop-color="#b0b0b0"/>
+                    <!-- Chrome band gradient -->
+                    <linearGradient id="vchr" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%"   stop-color="#909090"/>
+                        <stop offset="20%"  stop-color="#d8d8d8"/>
+                        <stop offset="50%"  stop-color="#f4f4f4"/>
+                        <stop offset="80%"  stop-color="#d0d0d0"/>
+                        <stop offset="100%" stop-color="#888888"/>
                     </linearGradient>
+                    <!-- Mesh background gradient -->
+                    <linearGradient id="vmesh" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%"   stop-color="#7a7a7a"/>
+                        <stop offset="30%"  stop-color="#b0b0b0"/>
+                        <stop offset="70%"  stop-color="#a8a8a8"/>
+                        <stop offset="100%" stop-color="#707070"/>
+                    </linearGradient>
+                    <!-- Base gradient -->
+                    <linearGradient id="vbase" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%"   stop-color="#888"/>
+                        <stop offset="40%"  stop-color="#e0e0e0"/>
+                        <stop offset="60%"  stop-color="#d8d8d8"/>
+                        <stop offset="100%" stop-color="#808080"/>
+                    </linearGradient>
+                    <!-- Clip for mesh grille -->
+                    <clipPath id="vgc">
+                        <rect x="9.5" y="5.5" width="13" height="14" rx="6.5"/>
+                    </clipPath>
                 </defs>
-                <!-- Head -->
-                <ellipse cx="12" cy="8.5" rx="4.8" ry="5.8" fill="url(#vsg)" stroke="#aaa" stroke-width="0.6"/>
-                <!-- Mesh horizontal lines -->
-                <g clip-path="url(#vmh)" stroke="#999" stroke-width="0.55" fill="none">
-                    <line x1="7" y1="4.5" x2="17" y2="4.5"/>
-                    <line x1="7" y1="6.5" x2="17" y2="6.5"/>
-                    <line x1="7" y1="8.5" x2="17" y2="8.5"/>
-                    <line x1="7" y1="10.5" x2="17" y2="10.5"/>
-                    <line x1="7" y1="12.5" x2="17" y2="12.5"/>
+
+                <!-- ── Outer head shell (chrome ring) ── -->
+                <rect x="8.5" y="3" width="15" height="20" rx="7.5" fill="url(#vchr)" stroke="#777" stroke-width="0.5"/>
+
+                <!-- ── Grille mesh background ── -->
+                <rect x="10" y="5.5" width="12" height="14" rx="6" fill="url(#vmesh)"/>
+
+                <!-- ── Mesh grid (horizontal + vertical), clipped ── -->
+                <g clip-path="url(#vgc)" stroke="#c8c8c8" stroke-width="0.45" fill="none" opacity="0.6">
+                    <line x1="9" y1="7"    x2="23" y2="7"/>
+                    <line x1="9" y1="8.5"  x2="23" y2="8.5"/>
+                    <line x1="9" y1="10"   x2="23" y2="10"/>
+                    <line x1="9" y1="11.5" x2="23" y2="11.5"/>
+                    <line x1="9" y1="13"   x2="23" y2="13"/>
+                    <line x1="9" y1="14.5" x2="23" y2="14.5"/>
+                    <line x1="9" y1="16"   x2="23" y2="16"/>
+                    <line x1="9" y1="17.5" x2="23" y2="17.5"/>
+                    <line x1="11.5" y1="5" x2="11.5" y2="21"/>
+                    <line x1="13.5" y1="5" x2="13.5" y2="21"/>
+                    <line x1="16"   y1="5" x2="16"   y2="21"/>
+                    <line x1="18.5" y1="5" x2="18.5" y2="21"/>
+                    <line x1="20.5" y1="5" x2="20.5" y2="21"/>
                 </g>
-                <!-- Centre band ring -->
-                <ellipse cx="12" cy="8.5" rx="4.8" ry="5.8" fill="none" stroke="#b0b0b0" stroke-width="0.8"/>
-                <!-- Neck -->
-                <rect x="11.1" y="14.3" width="1.8" height="2.8" rx="0.4" fill="#c0c0c0"/>
-                <!-- Cross bar -->
-                <rect x="7.2" y="17.1" width="9.6" height="1.3" rx="0.65" fill="#c0c0c0" stroke="#aaa" stroke-width="0.4"/>
-                <!-- Left leg -->
-                <line x1="8.8"  y1="18.4" x2="6.2"  y2="21.5" stroke="#c0c0c0" stroke-width="1.4" stroke-linecap="round"/>
-                <!-- Right leg -->
-                <line x1="15.2" y1="18.4" x2="17.8" y2="21.5" stroke="#c0c0c0" stroke-width="1.4" stroke-linecap="round"/>
-                <!-- Base foot bar -->
-                <line x1="5.2" y1="21.5" x2="18.8" y2="21.5" stroke="#c0c0c0" stroke-width="1.2" stroke-linecap="round"/>
+
+                <!-- ── Top chrome cap band ── -->
+                <rect x="8.5" y="3" width="15" height="3.5" rx="1.5" fill="url(#vchr)" stroke="#888" stroke-width="0.3"/>
+
+                <!-- ── Bottom chrome cap band ── -->
+                <rect x="8.5" y="18.5" width="15" height="4.5" rx="1.5" fill="url(#vchr)" stroke="#888" stroke-width="0.3"/>
+
+                <!-- ── Neck ── -->
+                <rect x="14" y="23" width="4" height="3.5" rx="1" fill="url(#vchr)"/>
+
+                <!-- ── Base disc (top face) ── -->
+                <ellipse cx="16" cy="28" rx="8.5" ry="2.2" fill="url(#vbase)" stroke="#777" stroke-width="0.5"/>
+                <!-- Base disc rim -->
+                <ellipse cx="16" cy="27.2" rx="8.5" ry="1.6" fill="url(#vchr)" stroke="#999" stroke-width="0.3"/>
             </svg>
         </button>
 
