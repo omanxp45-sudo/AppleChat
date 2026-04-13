@@ -1,8 +1,10 @@
-const CACHE = 'appleschat-v2';
+const CACHE = 'appleschat-v3';
 const ASSETS = [
   'ApplesChat-11.html',
   'manifest.json',
-  'apple-icon.svg'
+  'apple-icon.svg',
+  'apple-192.png',
+  'apple-512.png'
 ];
 
 self.addEventListener('install', function (e) {
