@@ -5,9 +5,15 @@
   "start_url": "ApplesChat-11.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#e5ddd5",
+  "background_color": "#b03025",
   "theme_color": "#b03025",
   "icons": [
+    {
+      "src": "apple-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "image.png",
       "sizes": "192x192",
