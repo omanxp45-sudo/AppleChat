@@ -246,6 +246,29 @@ html, body {
     border: 1.5px solid rgba(255,255,255,0.6);
     flex-shrink: 0;
 }
+.badge-name-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    min-width: 0;
+}
+.badge-name-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+}
+.badge-user-status {
+    font-size: 9px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.8);
+    font-style: italic;
+    line-height: 1.2;
+    max-width: 120px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
 .reply-icon {
     cursor: pointer;
     opacity: 0.9;
@@ -837,7 +860,7 @@ html, body {
             <img class="header-avatar" id="avatar" src="https://imgur.com/PVBYWRJ.png" alt="Avatar">
             <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-start;">
                 <span class="header-name" id="myUserName"></span>
-                <span class="header-status"><span class="header-status-dot"></span>Online</span>
+                <span class="header-status"><span class="header-status-dot"></span><span id="myStatusText">Online</span></span>
             </div>
         </a>
     </div>
@@ -1096,6 +1119,8 @@ window.onload = function () {
 
     document.getElementById('myUserName').textContent = username;
     if (avatar) document.getElementById('avatar').src = avatar;
+    var myStatus = localStorage.getItem('status') || '';
+    if (myStatus) document.getElementById('myStatusText').textContent = myStatus;
 
     // Image upload → open crop/rotate modal
     document.getElementById('fileInput').onchange = function () {
@@ -1243,7 +1268,13 @@ function appendMessage(msg) {
         // Avatar inside the badge
         var avatarSrc = msg.avatar || 'https://imgur.com/PVBYWRJ.png';
         $nameRow.append($('<img class="badge-avatar">').attr('src', avatarSrc).attr('alt', ''));
-        $nameRow.append(document.createTextNode(msg.username));
+        // Name + status stacked
+        var $nameStack = $('<span class="badge-name-stack">');
+        $nameStack.append($('<span class="badge-name-text">').text(msg.username));
+        if (msg.status) {
+            $nameStack.append($('<span class="badge-user-status">').text(msg.status));
+        }
+        $nameRow.append($nameStack);
         // Online status dot
         var isOnline = _onlineSet.has(msg.username);
         var $statusDot = $('<span class="badge-status-dot">').attr('data-for', msg.username);
@@ -1369,6 +1400,7 @@ function sendFunction() {
 function postToFirebase(extra) {
     var username = localStorage.getItem('myUserName') || '';
     var avatar   = localStorage.getItem('avatarImgData') || null;
+    var status   = localStorage.getItem('status') || null;
     if (!username) { window.location.href = 'index.html'; return; }
 
     playMessageSentSound();
@@ -1376,6 +1408,7 @@ function postToFirebase(extra) {
     var payload = Object.assign({
         username:   username,
         avatar:     avatar,
+        status:     status,
         created_at: firebase.database.ServerValue.TIMESTAMP
     }, extra);
 
@@ -1440,11 +1473,13 @@ function playClearSound()       { try { document.getElementById('myAudio2').play
 function heartbeat() {
     var username = localStorage.getItem('myUserName') || '';
     var avatar   = localStorage.getItem('avatarImgData') || null;
+    var status   = localStorage.getItem('status') || null;
     if (!username) return;
     try {
         firebase.database().ref('users/' + username).update({
             username: username,
             avatar:   avatar,
+            status:   status,
             lastSeen: firebase.database.ServerValue.TIMESTAMP
         });
     } catch (e) {}
@@ -1477,10 +1512,10 @@ function listenOnlineUsers() {
                 var dot     = document.createElement('span');  dot.className = 'online-dot';
                 var name    = document.createElement('div');   name.className = 'online-user-name';
                 name.textContent = user.username;
-                // Status label under name
+                // Status label under name — show user's written status or "Online"
                 var statusLbl = document.createElement('div');
                 statusLbl.className = 'online-user-status';
-                statusLbl.textContent = 'Online';
+                statusLbl.textContent = user.status || 'Online';
 
                 imgWrap.appendChild(img);
                 imgWrap.appendChild(dot);
