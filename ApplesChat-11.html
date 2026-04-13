@@ -1476,8 +1476,11 @@ function startGoLive() {
             var username = localStorage.getItem('myUserName') || 'You';
             document.getElementById('goliveUsername').textContent = '📍 ' + username;
             document.getElementById('goliveOverlay').classList.add('show');
-            // Remove from Firebase if user disconnects unexpectedly
-            try { firebase.database().ref('live').onDisconnect().remove(); } catch(e) {}
+            // Auto-clear on disconnect using users/ node (already writable)
+            try {
+                firebase.database().ref('users/' + username + '/liveFrame').onDisconnect().remove();
+                firebase.database().ref('users/' + username + '/isLive').onDisconnect().set(false);
+            } catch(e) {}
             // Broadcast first frame after camera warms up, then every 2s
             setTimeout(captureAndBroadcast, 800);
             _liveInterval = setInterval(captureAndBroadcast, 2000);
@@ -1488,14 +1491,16 @@ function startGoLive() {
 function captureAndBroadcast() {
     var video = document.getElementById('liveVideo');
     if (!video || !_liveStream) return;
+    var username = localStorage.getItem('myUserName') || '';
     try {
         var canvas = document.createElement('canvas');
         canvas.width = 320; canvas.height = 240;
         canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
-        firebase.database().ref('live').set({
-            username: localStorage.getItem('myUserName') || '',
-            frame: canvas.toDataURL('image/jpeg', 0.45),
-            ts: firebase.database.ServerValue.TIMESTAMP
+        // Write into users/ node — same path as heartbeat, guaranteed writable
+        firebase.database().ref('users/' + username).update({
+            isLive: true,
+            liveFrame: canvas.toDataURL('image/jpeg', 0.45),
+            lastSeen: firebase.database.ServerValue.TIMESTAMP
         });
     } catch(e) {}
 }
@@ -1505,18 +1510,28 @@ function stopGoLive() {
     if (_liveStream) { _liveStream.getTracks().forEach(function (t) { t.stop(); }); _liveStream = null; }
     document.getElementById('liveVideo').srcObject = null;
     document.getElementById('goliveOverlay').classList.remove('show');
-    try { firebase.database().ref('live').remove(); } catch(e) {}
+    var username = localStorage.getItem('myUserName') || '';
+    try {
+        firebase.database().ref('users/' + username).update({ isLive: false, liveFrame: null });
+    } catch(e) {}
 }
 
 function listenLiveStream() {
     try {
-        firebase.database().ref('live').on('value', function (snapshot) {
-            var data = snapshot.val();
+        // Reuse the users/ node — same listener as online users, no new Firebase path needed
+        firebase.database().ref('users').on('value', function (snapshot) {
             var me = localStorage.getItem('myUserName') || '';
             var pip = document.getElementById('viewerPip');
-            if (data && data.frame && data.username && data.username !== me) {
-                document.getElementById('liveFrame').src = data.frame;
-                document.getElementById('viewerLiveUsername').textContent = '📍 ' + data.username;
+            var found = null;
+            snapshot.forEach(function (child) {
+                var u = child.val();
+                if (u && u.isLive && u.liveFrame && u.username && u.username !== me) {
+                    found = u;
+                }
+            });
+            if (found) {
+                document.getElementById('liveFrame').src = found.liveFrame;
+                document.getElementById('viewerLiveUsername').textContent = '📍 ' + found.username;
                 pip.style.display = 'block';
             } else {
                 pip.style.display = 'none';
