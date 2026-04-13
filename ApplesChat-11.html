@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="RedAppleChat is a FREE chatting webApp.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3pro.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<title>ApplesChat</title>
+<link rel="shortcut icon" href="https://imgur.com/57AweD4.png">
+<style>
+    .bannerDiv {
+        width: 100%;
+        height: 50px;
+        background-color: lime;
+        text-align: center;
+    }
+    #avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: block;
+        margin: 0 auto;
+        object-fit: cover;
+        cursor: pointer;
+    }
+    .UsernameLabelDiv { text-align: center; }
+    #myUserName {
+        text-align: center;
+        border: none;
+        background: white;
+        width: 120px;
+    }
+    #status {
+        text-align: center;
+        border: 1px solid blue;
+        box-shadow: 10px 1px 8px #888888;
+        border-radius: 4px;
+        color: black;
+        width: 300px;
+    }
+    .msg-avatar {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        object-fit: cover;
+        vertical-align: middle;
+        display: inline-block;
+    }
+    .myInputtextDiv {
+        box-shadow: 10px 10px 8px #888888;
+        margin: auto;
+        border: 3px solid red;
+        padding: 5px;
+        width: 300px;
+        min-height: 90px;
+        background-color: lightgrey;
+    }
+    #myInput {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid red;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .conDiv {
+        background-color: #ddd;
+        overflow: auto;
+        text-align: left;
+        box-shadow: 10px 10px 8px #888888;
+        margin: auto;
+        border: 3px solid red;
+        padding: 5px;
+        width: 300px;
+        height: 300px;
+        word-wrap: break-word;
+    }
+    .chat-sticker {
+        width: 30px;
+        height: 30px;
+    }
+    .chat-upload {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid lime;
+        border-radius: 4px;
+        padding: 3px;
+        box-shadow: 0 0 2px 1px rgba(0,140,186,0.5);
+    }
+    .timeSpan {
+        color: grey;
+        font-size: 10px;
+    }
+    .msg-row { margin-bottom: 4px; }
+    #dbStatus {
+        text-align: center;
+        font-size: 11px;
+        color: #888;
+        margin: 2px auto;
+        width: 300px;
+        min-height: 16px;
+    }
+</style>
+</head>
+<body>
+
+<div class="bannerDiv">
+    <img style="width:40px;height:40px" src="https://imgur.com/57AweD4.png" alt="LOGO">
+    <span style="font-family: Times New Roman; font-size: 30px; color: red">ApplesChat</span>
+</div>
+
+<form onsubmit="return false;">
+    <a href="index.html">
+        <img src="https://imgur.com/PVBYWRJ.png" id="avatar" alt="Avatar">
+    </a>
+    <div class="UsernameLabelDiv">
+        <a href="index.html">
+            <input type="text" id="myUserName" disabled>
+        </a>
+    </div>
+    <div style="text-align:center;">
+        <a href="index.html">
+            <input type="text" id="status" disabled>
+        </a>
+    </div>
+
+    <div class="conDiv" id="conDivID"></div>
+    <div id="dbStatus">Connecting to Firebase…</div>
+
+    <div class="myInputtextDiv">
+        <input style="color:black;" type="text" id="myInput"
+               maxlength="10000" placeholder="Type a message…">
+        <input type="hidden" id="baseimage">
+        <br>
+
+        <a class="btn btn-primary btn-sm" onclick="sendFunction()">
+            <span class="glyphicon glyphicon-send"></span> Send
+        </a>
+
+        <input id="fileInput" type="file" accept="image/*" style="display:none">
+        <a class="btn btn-success btn-sm"
+           onclick="document.getElementById('fileInput').click()">
+            <span class="glyphicon glyphicon-camera"></span> Image
+        </a>
+
+        <a class="btn btn-danger btn-sm" onclick="clearLocalView()">
+            <span class="glyphicon glyphicon-trash"></span> Clear
+        </a>
+
+        <!-- Sticker picker -->
+        <div class="btn-group" style="display:inline; position:relative;">
+            <button type="button"
+                    class="btn btn-outline-light btn-sm dropdown-toggle dropdown-toggle-split"
+                    data-toggle="dropdown">
+                <img src="https://imgur.com/PVBYWRJ.png" width="20" height="20" alt="stickers">
+            </button>
+            <div class="dropdown-menu" style="max-height:200px; overflow-y:auto;">
+                <!-- Smileys & People -->
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/PVBYWRJ.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/bgOYEUb.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/UCi89or.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/Bj4xOS9.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/7QNYfSh.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/6sqrgNK.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/Dt3VM26.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/yBUGgCQ.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/XNXYKlC.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/IZh9H8B.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/bYTUGeR.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/jm3nvjK.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/lInxmxK.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/dIc7Abs.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/mx6Tu33.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/47pnPHD.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/HbOdZSE.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/TFO84n2.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/XZGVwdn.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/rOtcLJf.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/h5v5eld.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/3F7DZI9.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/OW0EiZp.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/yoEf2a6.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/V59HXYr.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/LoJ7Hrg.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/XGiR5H4.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/VDKPRc3.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/6QlEafl.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/hxleV1s.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/GZC0Mga.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/HE2E2sL.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/D9DshnJ.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/rKS2mLu.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/wgmmMJM.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/00zu1KL.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/2DoStHY.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/1x3bgVM.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/IBA9mXh.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/98EIMUt.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/yuLJrdH.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/AqWbP2a.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/NfxkEP9.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/NBnjmS3.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/sgIn7Hp.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/PZlYsh3.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/p4oJzJP.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/lFJfHhy.png"  width="20" height="20" alt=".."></a>
+                <br>
+                <!-- Black Smileys -->
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/mCjBjMP.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/ZLVruHF.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/5IqJpdY.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/wkjgd5T.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/qbeRdCr.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/aFCkpNZ.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/RV84irI.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/OWGw5bW.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/XFGjDSL.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/G2lMKBM.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/bxtFpmf.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/zX9o3nM.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/kFp9RpM.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/IjZSn44.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/YlsSaRf.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/0Z8aJ75.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/LFCpFRE.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/YP5l3HU.png"  width="20" height="20" alt=".."></a>
+                <br>
+                <!-- Animals -->
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/x0IuLGF.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/L5xzDeI.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/s5C1kbM.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/a5ESBw1.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/JJai8XD.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/QsVsAUB.png"  width="20" height="20" alt=".."></a>
+                <br>
+                <!-- Others -->
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/zLXQ7Ua.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/u82MtgI.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/5DJF0bU.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/Go9vKSd.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/JGIGROu.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/7ECo6jN.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/VO3hRHO.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/KRQnNEz.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/r0nip4X.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/F6Tsqe7.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/2BER987.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/PbILBZG.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/EjKXPIT.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/kBV0NOD.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/SSXnDqx.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/Xg5F0ai.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/nXqhhrg.png"  width="20" height="20" alt=".."></a>
+                <a class="dropdown-item sticker" href="#"><img src="https://imgur.com/sNXQxOq.png"  width="20" height="20" alt=".."></a>
+            </div>
+        </div>
+    </div><!-- end myInputtextDiv -->
+</form>
+
+<br>
+
+<audio id="myAudio1">
+    <source src="../ApplesChat-1/Media/Sounds/message_sent_sound.mp3" type="audio/mpeg">
+</audio>
+<audio id="myAudio2">
+    <source src="../ApplesChat-1/Media/Sounds/clear_sound.mp3" type="audio/mpeg">
+</audio>
+
+<div style="text-align:center;">
+    Page Views<br>
+    <a href="http://www.hitwebcounter.com" target="_blank">
+        <img src="http://hitwebcounter.com/counter/counter.php?page=7108745&style=0005&nbdigits=9&type=page&initCount=0"
+             title="" alt="Page Views">
+    </a>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+// ── Page init ─────────────────────────────────────────────────────────────────
+window.onload = function () {
+    var username = localStorage.getItem('myUserName') || '';
+    var status   = localStorage.getItem('status')     || '';
+    var avatar   = localStorage.getItem('avatarImgData');
+
+    if (!username) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    document.getElementById('myUserName').value = username;
+    document.getElementById('status').value     = status;
+    if (avatar) document.getElementById('avatar').src = avatar;
+
+    // Image upload handler
+    document.getElementById('fileInput').onchange = function () {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById('baseimage').value = e.target.result;
+            sendFunction();
+        };
+        reader.readAsDataURL(this.files[0]);
+    };
+
+    // Sticker click handler
+    $(document).on('click', '.dropdown-menu .sticker', function (e) {
+        e.preventDefault();
+        var url = $(this).find('img').attr('src');
+        if (url) postToFirebase({ sticker_url: url });
+    });
+
+    // Enter key sends message
+    document.getElementById('myInput').addEventListener('keyup', function (e) {
+        if (e.keyCode === 13) sendFunction();
+    });
+
+    // Connect to Firebase and listen for messages in real time
+    connectFirebase();
+};
+
+// ── Firebase real-time listener ───────────────────────────────────────────────
+function connectFirebase() {
+    var db  = firebase.database();
+    // Load last 50 messages, then listen for every new one
+    var ref = db.ref('messages').orderByChild('created_at').limitToLast(50);
+
+    ref.once('value', function (snapshot) {
+        // Initial batch — render in chronological order
+        var rows = [];
+        snapshot.forEach(function (child) { rows.push(child.val()); });
+        rows.forEach(appendMessage);
+        scrollToBottom();
+        setStatus('');
+    }, function (err) {
+        setStatus('Firebase error: ' + err.message + ' — check firebase-config.js');
+    });
+
+    // New messages arriving after initial load
+    ref.on('child_added', function (snapshot) {
+        // Skip messages already rendered by the initial once() call
+        if (!initialLoadDone) return;
+        appendMessage(snapshot.val());
+        scrollToBottom();
+    });
+
+    // Mark initial load complete after a tick
+    setTimeout(function () { initialLoadDone = true; }, 500);
+}
+
+var initialLoadDone = false;
+
+// ── Render one message ────────────────────────────────────────────────────────
+function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(str || ''));
+    return d.innerHTML;
+}
+
+function embedUrls(text) {
+    var safe = escapeHtml(text);
+    return safe.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+}
+
+function formatTime(ts) {
+    var d = new Date(ts);
+    var h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+    var ap = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + ':' + pad(m) + ':' + pad(s) + ' ' + ap;
+}
+function pad(n) { return n < 10 ? '0' + n : n; }
+
+function appendMessage(msg) {
+    var $row = $('<div class="msg-row">');
+
+    if (msg.avatar) {
+        $row.append($('<img class="msg-avatar">').attr('src', msg.avatar));
+        $row.append(' ');
+    }
+
+    $row.append('<span style="color:red;">' + escapeHtml(msg.username) + ': </span>');
+
+    if (msg.sticker_url) {
+        $row.append($('<img class="chat-sticker">').attr('src', msg.sticker_url));
+    } else {
+        if (msg.message) {
+            $row.append($('<span>').html(embedUrls(msg.message)));
+        }
+        if (msg.image_data) {
+            $row.append('<br>');
+            $row.append($('<img class="chat-upload">').attr('src', msg.image_data));
+        }
+    }
+
+    var ts = msg.created_at ? formatTime(msg.created_at) : '';
+    $row.append('<br><span class="timeSpan">' + ts + '</span>');
+
+    $('#conDivID').append($row);
+}
+
+function scrollToBottom() {
+    var box = document.getElementById('conDivID');
+    box.scrollTop = box.scrollHeight;
+}
+
+function setStatus(text) {
+    document.getElementById('dbStatus').textContent = text;
+}
+
+// ── Send a text message or image ──────────────────────────────────────────────
+function sendFunction() {
+    var message   = document.getElementById('myInput').value.trim();
+    var imageData = document.getElementById('baseimage').value;
+
+    if (!message && !imageData) return;
+
+    postToFirebase({
+        message:    message    || null,
+        image_data: imageData  || null
+    });
+
+    document.getElementById('myInput').value   = '';
+    document.getElementById('baseimage').value = '';
+    document.getElementById('myInput').focus();
+}
+
+// ── Write any message type to Firebase ───────────────────────────────────────
+function postToFirebase(extra) {
+    var username = localStorage.getItem('myUserName') || '';
+    var avatar   = localStorage.getItem('avatarImgData') || null;
+
+    if (!username) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    playMessageSentSound();
+
+    var payload = Object.assign({
+        username:   username,
+        avatar:     avatar,
+        created_at: firebase.database.ServerValue.TIMESTAMP
+    }, extra);
+
+    firebase.database().ref('messages').push(payload)
+        .catch(function (err) {
+            setStatus('Send failed: ' + err.message);
+        });
+}
+
+// ── Clear local view (messages stay in Firebase) ─────────────────────────────
+function clearLocalView() {
+    document.getElementById('conDivID').innerHTML = '';
+    playClearSound();
+}
+
+// ── Sounds ────────────────────────────────────────────────────────────────────
+function playMessageSentSound() { document.getElementById('myAudio1').play(); }
+function playClearSound()       { document.getElementById('myAudio2').play(); }
+</script>
+
+</body>
+</html>
