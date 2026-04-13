@@ -10,13 +10,7 @@
   "icons": [
     {
       "src": "57AweD4.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://imgur.com/57AweD4.png",
-      "sizes": "512x512",
+      "sizes": "128x128",
       "type": "image/png",
       "purpose": "any"
     }
