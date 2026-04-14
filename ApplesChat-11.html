@@ -1902,10 +1902,6 @@ html.dark-mode, body.dark-mode {
                 <a class="dropdown-item sticker" href="#" onclick="pmSendSticker('https://imgur.com/OWGw5bW.png');return false;"><img src="https://imgur.com/OWGw5bW.png" alt=""></a>
             </div>
         </div>
-        <!-- Live -->
-        <button class="tray-btn" onclick="startGoLive(); pmCloseTray();" title="Go Live">
-            <span class="tray-icon">📡</span><span>Live</span>
-        </button>
     </div>
 
     <!-- Input bar -->
@@ -2073,10 +2069,22 @@ window.onload = function () {
         this.classList.toggle('open', isOpen);
     });
 
-    // Close tray + sticker menu on outside click
-    document.addEventListener('click', function () {
-        document.getElementById('stickerMenu').classList.remove('show');
-        closeTray();
+    // Close tray + sticker menu on outside click — only affects its own panel
+    document.addEventListener('click', function (e) {
+        // Public chat tray: close only when PM panel is NOT open
+        var pmOpen = document.getElementById('pmOverlay').classList.contains('show');
+        if (!pmOpen) {
+            document.getElementById('stickerMenu').classList.remove('show');
+            closeTray();
+        } else {
+            // PM is open: close PM tray/stickers on outside click within PM
+            var pmTray = document.getElementById('pmActionTray');
+            var pmStickerDd = document.getElementById('pmStickerDropdown');
+            if (!pmTray.contains(e.target) && !document.getElementById('pmPlusBtn').contains(e.target)) {
+                pmStickerDd.classList.remove('show');
+                pmCloseTray();
+            }
+        }
     });
 
     // Send/mic toggle based on input content
