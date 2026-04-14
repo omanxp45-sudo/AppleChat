@@ -2212,9 +2212,12 @@ function appendMessage(msg) {
         $replyBtn.attr('onclick', '_doReply("' + rid + '"); event.stopPropagation();');
         $replyBtn.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="16" height="16" fill="rgba(220,53,69,0.8)"><path d="M7.5 4L2 9l5.5 5V11c4.5 0 7.5 1.5 9 5-0.5-5-3.5-9-9-9V4z"/></svg>');
         $nameRow.append($replyBtn);
-        // DM button
-        var $dmBtn = $('<button class="dm-btn" title="Private message">💬</button>');
-        $dmBtn.attr('onclick', 'openPM("' + msg.username.replace(/"/g,'') + '","' + (msg.avatar||'').replace(/"/g,'') + '","' + (msg.status||'Online').replace(/"/g,'') + '"); event.stopPropagation();');
+        // DM button — anchor so browser never blocks new tab
+        var $dmBtn = $('<a class="dm-btn" title="Private message" target="_blank">💬</a>');
+        var _dmUrl = 'pm.html?peer=' + encodeURIComponent(msg.username)
+                   + '&avatar=' + encodeURIComponent(msg.avatar || '')
+                   + '&status=' + encodeURIComponent(msg.status || 'Online');
+        $dmBtn.attr('href', _dmUrl).on('click', function(e){ e.stopPropagation(); _clearPMUnread(msg.username); });
         $nameRow.append($dmBtn);
         // Block button
         var $blockBtn = $('<button class="block-btn" title="Block user">🚫</button>');
@@ -2464,12 +2467,16 @@ function listenOnlineUsers() {
                     callBtn.textContent = '📞';
                     callBtn.setAttribute('onclick', 'initiateCall("' + safeUname + '"); event.stopPropagation();');
                     imgWrap.appendChild(callBtn);
-                    // DM button (bottom-right)
-                    var dmBtn = document.createElement('button');
+                    // DM button (bottom-right) — real anchor so browser never blocks new tab
+                    var dmBtn = document.createElement('a');
                     dmBtn.className = 'online-dm-btn';
                     dmBtn.title = 'Message ' + user.username;
                     dmBtn.textContent = '💬';
-                    dmBtn.setAttribute('onclick', 'openPM("' + safeUname + '","' + (user.avatar||'').replace(/"/g,'') + '","' + (user.status||'Online').replace(/"/g,'') + '"); event.stopPropagation();');
+                    dmBtn.target = '_blank';
+                    dmBtn.href = 'pm.html?peer=' + encodeURIComponent(user.username)
+                               + '&avatar=' + encodeURIComponent(user.avatar || '')
+                               + '&status=' + encodeURIComponent(user.status || 'Online');
+                    dmBtn.addEventListener('click', function(e) { e.stopPropagation(); _clearPMUnread(user.username); });
                     // Unread badge
                     var unread = _pmUnread[safeUname] || 0;
                     if (unread > 0) {
@@ -3089,19 +3096,20 @@ function _pmChatKey(a, b) {
     return [a, b].sort().join('__pm__');
 }
 
+function _clearPMUnread(username) {
+    delete _pmUnread[username];
+    _refreshUnreadBadges();
+}
+
+// openPM kept for any legacy callers — now just builds the URL and navigates
 function openPM(username, avatar, status) {
     var me = localStorage.getItem('myUserName') || '';
     if (!username || username === me) return;
-
-    // Clear unread badge
-    delete _pmUnread[username];
-    _refreshUnreadBadges();
-
-    // Open in new window
+    _clearPMUnread(username);
     var url = 'pm.html?peer=' + encodeURIComponent(username)
             + '&avatar=' + encodeURIComponent(avatar || '')
             + '&status=' + encodeURIComponent(status || 'Online');
-    window.open(url, 'pm_' + username, 'width=420,height=700,resizable=yes');
+    window.open(url, '_blank');
 }
 
 function closePM() {
