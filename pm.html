@@ -310,6 +310,39 @@ html.dark-mode, body.dark-mode {
     font-size: 36px; color: #fff; cursor: pointer; z-index: 10001;
     text-shadow: 0 1px 6px rgba(0,0,0,0.6); user-select: none;
 }
+/* Contact modal */
+.pm-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 9000;
+    align-items: center; justify-content: center;
+}
+.pm-modal-overlay.show { display: flex; }
+.pm-modal-panel {
+    background: #fff; border-radius: 18px;
+    padding: 20px 18px 16px; width: min(340px, calc(100vw - 32px));
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.dark-mode .pm-modal-panel { background: #1e1e2e; color: #eee; }
+.pm-modal-title {
+    font-size: 15px; font-weight: 700; margin-bottom: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.pm-modal-close {
+    background: none; border: none; font-size: 22px; cursor: pointer;
+    color: #999; line-height: 1; padding: 0;
+}
+.pm-modal-input {
+    width: 100%; border: 1.5px solid #ddd; border-radius: 10px;
+    padding: 9px 12px; font-size: 15px; margin-bottom: 10px;
+    box-sizing: border-box; outline: none;
+}
+.dark-mode .pm-modal-input { background: #2a2a3e; border-color: #444; color: #eee; }
+.pm-modal-btn {
+    width: 100%; padding: 11px; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 8px;
+}
+.pm-modal-btn.primary { background: #0d6efd; color: #fff; }
+.pm-modal-btn.addrbook { background: rgba(37,211,102,0.15); color: #16a34a; border: 1px solid rgba(37,211,102,0.3); }
 </style>
 </head>
 <body>
@@ -842,14 +875,7 @@ function openEventModal() {
     sendMsg({ event_title: title, event_date: date, event_time: time || '', event_location: location || '' });
 }
 
-function openContactModal() {
-    var name = prompt('Contact name:');
-    if (!name) return;
-    var phone = prompt('Phone number:');
-    if (!phone) return;
-    var email = prompt('Email (optional):');
-    sendMsg({ contact_name: name, contact_phone: phone, contact_email: email || '' });
-}
+// openContactModal defined at bottom of file (uses pm-modal-overlay + address book)
 
 // ── Voice ─────────────────────────────────────────────────────────────────────
 function toggleVoice() {
@@ -898,6 +924,55 @@ function openLightbox(src) {
 }
 function closeLightbox() {
     document.getElementById('lightboxOverlay').classList.remove('show');
+}
+</script>
+
+<!-- Contact modal -->
+<div class="pm-modal-overlay" id="pmContactModal" onclick="if(event.target===this)closePMContactModal()">
+    <div class="pm-modal-panel">
+        <div class="pm-modal-title">
+            <span>👤 Share Contact</span>
+            <button class="pm-modal-close" onclick="closePMContactModal()">×</button>
+        </div>
+        <button class="pm-modal-btn addrbook" id="pmAddrBookBtn" onclick="pmPickFromAddressBook()">📒 From Address Book</button>
+        <input class="pm-modal-input" id="pmContactName"  placeholder="Name…"  maxlength="60">
+        <input class="pm-modal-input" id="pmContactPhone" placeholder="Phone…" maxlength="30" type="tel">
+        <input class="pm-modal-input" id="pmContactEmail" placeholder="Email (optional)" maxlength="80" type="email">
+        <button class="pm-modal-btn primary" onclick="sendPMContact()">Share Contact</button>
+    </div>
+</div>
+
+<script>
+function openContactModal() {
+    var btn = document.getElementById('pmAddrBookBtn');
+    if (btn) btn.style.display = ('contacts' in navigator) ? '' : 'none';
+    document.getElementById('pmContactModal').classList.add('show');
+}
+function closePMContactModal() {
+    document.getElementById('pmContactModal').classList.remove('show');
+}
+async function pmPickFromAddressBook() {
+    if (!('contacts' in navigator)) {
+        alert('Address book not supported in this browser.\nTry Chrome on Android or Safari on iOS 14.5+.');
+        return;
+    }
+    try {
+        var contacts = await navigator.contacts.select(['name', 'tel', 'email'], { multiple: false });
+        if (!contacts || contacts.length === 0) return;
+        var c = contacts[0];
+        document.getElementById('pmContactName').value  = (c.name  && c.name[0])  || '';
+        document.getElementById('pmContactPhone').value = (c.tel   && c.tel[0])   || '';
+        document.getElementById('pmContactEmail').value = (c.email && c.email[0]) || '';
+    } catch (err) { console.warn('Contact picker error:', err); }
+}
+function sendPMContact() {
+    var name  = document.getElementById('pmContactName').value.trim();
+    var phone = document.getElementById('pmContactPhone').value.trim();
+    var email = document.getElementById('pmContactEmail').value.trim();
+    if (!name) { document.getElementById('pmContactName').focus(); return; }
+    sendMsg({ contact_name: name, contact_phone: phone, contact_email: email });
+    closePMContactModal();
+    ['pmContactName','pmContactPhone','pmContactEmail'].forEach(function(id){ document.getElementById(id).value=''; });
 }
 </script>
 </body>
