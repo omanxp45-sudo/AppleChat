@@ -322,9 +322,9 @@ html.dark-mode, body.dark-mode {
 
     <!-- Action tray -->
     <div class="action-tray" id="actionTray">
-        <!-- Photo -->
-        <button class="tray-btn" onclick="document.getElementById('pmFileInput').click(); closeTray();" title="Photo">
-            <span class="tray-icon">📷</span><span>Photo</span>
+        <!-- Gallery (Photo/Video) -->
+        <button class="tray-btn" onclick="document.getElementById('pmFileInput').click(); closeTray();" title="Gallery">
+            <span class="tray-icon">🖼️</span><span>Gallery</span>
         </button>
         <!-- Camera -->
         <button class="tray-btn" onclick="openCamera(); closeTray();" title="Camera">
@@ -419,7 +419,7 @@ html.dark-mode, body.dark-mode {
 </div>
 
 <!-- Hidden inputs -->
-<input type="file" id="pmFileInput" accept="image/*" style="display:none;">
+<input type="file" id="pmFileInput" accept="image/*,video/*" multiple style="display:none;">
 <input type="file" id="pmCameraInput" accept="image/*" capture="environment" style="display:none;">
 <input type="file" id="pmDocInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" style="display:none;">
 <input type="file" id="pmAudioInput" accept="audio/*" style="display:none;">
@@ -459,21 +459,31 @@ window.onload = function () {
 
     // File input
     document.getElementById('pmFileInput').onchange = function () {
-        var file = this.files[0]; if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            var img = new Image();
-            img.onload = function () {
-                var canvas = document.createElement('canvas');
-                var max = 800, scale = Math.min(1, max / Math.max(img.width, img.height));
-                canvas.width  = Math.round(img.width  * scale);
-                canvas.height = Math.round(img.height * scale);
-                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                sendMsg({ image_data: canvas.toDataURL('image/jpeg', 0.75) });
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+        var files = this.files;
+        if (!files.length) return;
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var reader = new FileReader();
+            (function(f) {
+                reader.onload = function (e) {
+                    if (f.type.startsWith('video/')) {
+                        sendMsg({ video_data: e.target.result, video_name: f.name });
+                    } else {
+                        var img = new Image();
+                        img.onload = function () {
+                            var canvas = document.createElement('canvas');
+                            var max = 800, scale = Math.min(1, max / Math.max(img.width, img.height));
+                            canvas.width  = Math.round(img.width  * scale);
+                            canvas.height = Math.round(img.height * scale);
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            sendMsg({ image_data: canvas.toDataURL('image/jpeg', 0.75) });
+                        };
+                        img.src = e.target.result;
+                    }
+                };
+            })(file);
+            reader.readAsDataURL(file);
+        }
         this.value = '';
     };
 
@@ -584,7 +594,7 @@ function sendMsg(extra) {
     var input = document.getElementById('pmInput');
     var text  = input.value.trim();
     extra = extra || {};
-    if (!text && !extra.image_data && !extra.audio_data && !extra.sticker_url && !extra.doc_data && !extra.audio_file_data && !extra.contact_name && !extra.event_title && !extra.poll_question) return;
+    if (!text && !extra.image_data && !extra.audio_data && !extra.sticker_url && !extra.doc_data && !extra.audio_file_data && !extra.contact_name && !extra.event_title && !extra.poll_question && !extra.video_data) return;
     var myAvatar = localStorage.getItem('avatarImgData') || 'https://imgur.com/PVBYWRJ.png';
     var myStatus = localStorage.getItem('status') || '';
     input.value = ''; input.style.height = 'auto'; updateSendMic();
@@ -620,6 +630,12 @@ function appendMsg(msg) {
         var au = document.createElement('audio');
         au.controls = true; au.src = msg.audio_file_data;
         bubble.appendChild(au); isMedia = true;
+    } else if (msg.video_data) {
+        var vid = document.createElement('video');
+        vid.controls = true; vid.src = msg.video_data;
+        vid.style.maxWidth = '220px';
+        vid.style.borderRadius = '12px';
+        bubble.appendChild(vid); isMedia = true;
     } else if (msg.poll_question) {
         var title = document.createElement('div');
         title.style.fontWeight = '700';

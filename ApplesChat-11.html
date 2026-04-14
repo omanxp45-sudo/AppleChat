@@ -1779,15 +1779,15 @@ html.dark-mode, body.dark-mode {
 
     <!-- Hidden inputs -->
     <input type="hidden" id="baseimage">
-    <input id="fileInput" type="file" accept="image/*" style="display:none">
+    <input id="fileInput" type="file" accept="image/*,video/*" multiple style="display:none">
 
     <!-- Action tray (slides up above input bar) -->
     <div class="action-tray" id="actionTray">
 
-        <!-- Photo -->
-        <button class="tray-btn" onclick="document.getElementById('fileInput').click(); closeTray();" title="Photo">
-            <span class="tray-icon">📷</span>
-            <span>Photo</span>
+        <!-- Gallery (Photo/Video) -->
+        <button class="tray-btn" onclick="document.getElementById('fileInput').click(); closeTray();" title="Gallery">
+            <span class="tray-icon">🖼️</span>
+            <span>Gallery</span>
         </button>
 
         <!-- Sticker picker -->
@@ -2242,13 +2242,24 @@ window.onload = function () {
     var myStatus = localStorage.getItem('status') || '';
     if (myStatus) document.getElementById('myStatusText').textContent = myStatus;
 
-    // Image upload → open crop/rotate modal
+    // Gallery upload → handle images (with crop) and videos
     document.getElementById('fileInput').onchange = function () {
-        var file = this.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function (e) { openCropModal(e.target.result); };
-        reader.readAsDataURL(file);
+        var files = this.files;
+        if (!files.length) return;
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var reader = new FileReader();
+            (function(f) {
+                reader.onload = function (e) {
+                    if (f.type.startsWith('video/')) {
+                        postToFirebase({ video_data: e.target.result, video_name: f.name });
+                    } else {
+                        openCropModal(e.target.result);
+                    }
+                };
+            })(file);
+            reader.readAsDataURL(file);
+        }
         this.value = '';
     };
 
@@ -2537,6 +2548,14 @@ function appendMessage(msg) {
         var $body = $('<div class="card-body">');
         $body.append($('<div class="card-sub" style="margin-bottom:8px;">').text(msg.audio_file_name || 'Audio file'));
         $body.append($('<audio controls style="width:100%;margin-top:4px;">').attr('src', msg.audio_file_data));
+        $card.append($body);
+        $bubble.append($card);
+        isMedia = false;
+    } else if (msg.video_data) {
+        var $card = $('<div class="card-bubble">');
+        $card.append('<div class="card-header audio-header">🎬 Video</div>');
+        var $body = $('<div class="card-body">');
+        $body.append($('<video controls style="width:100%;max-width:320px;border-radius:12px;margin-top:4px;">').attr('src', msg.video_data));
         $card.append($body);
         $bubble.append($card);
         isMedia = false;
@@ -3545,7 +3564,7 @@ function openPM(username, avatar, status) {
     var url = 'pm.html?peer=' + encodeURIComponent(username)
             + '&avatar=' + encodeURIComponent(avatar || '')
             + '&status=' + encodeURIComponent(status || 'Online');
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'width=400,height=600,scrollbars=yes,resizable=yes');
 }
 
 function closePM() {
