@@ -388,6 +388,7 @@ html, body {
     background: #fff;
     border-top: 1px solid #eee;
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     padding: 0 12px;
     flex-shrink: 0;
@@ -396,18 +397,19 @@ html, body {
     transition: max-height 0.22s ease, padding 0.22s ease;
 }
 .action-tray.open {
-    max-height: 90px;
+    max-height: 220px;
     padding: 10px 12px;
     overflow: visible;
 }
 .tray-btn {
-    flex: 1;
+    flex: 1 1 calc(25% - 6px);
+    max-width: calc(25% - 6px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    padding: 10px 6px;
+    padding: 8px 4px;
     border: none;
     border-radius: 14px;
     background: #f5f5f5;
@@ -1571,6 +1573,149 @@ html.dark-mode, body.dark-mode {
     box-shadow: 0 1px 4px rgba(255,31,58,0.5);
     pointer-events: none;
 }
+
+/* ── Rich modal (poll / event / contact) ─────────────────────────────────── */
+.rich-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 8500;
+    align-items: flex-end; justify-content: center;
+}
+.rich-modal.show { display: flex; }
+.rich-panel {
+    width: 100%; max-width: 600px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px);
+    border-top-left-radius: 24px; border-top-right-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.65);
+    padding: 20px 18px 36px;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+    animation: slideUp 0.22s ease;
+    max-height: 90vh; overflow-y: auto;
+}
+.dark-mode .rich-panel { background: rgba(18,18,32,0.92); color: #e2e2e2; border-color: rgba(255,255,255,0.1); }
+.rich-title {
+    font-size: 16px; font-weight: 700; margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.rich-input {
+    width: 100%; padding: 10px 14px; border-radius: 14px;
+    border: 1px solid rgba(0,0,0,0.12); font-size: 15px;
+    background: rgba(255,255,255,0.7); margin-bottom: 10px; outline: none;
+    transition: border-color 0.2s;
+}
+.rich-input:focus { border-color: rgba(13,110,253,0.5); }
+.dark-mode .rich-input { background: rgba(35,35,55,0.7); border-color: rgba(255,255,255,0.15); color: #e2e2e2; }
+.rich-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.rich-row .rich-input { margin-bottom: 0; }
+.rich-label { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.6px; }
+.dark-mode .rich-label { color: #aaa; }
+.rich-send-btn {
+    width: 100%; padding: 12px; border-radius: 18px; border: none;
+    background: linear-gradient(135deg,#3355ff,#0022ff); color: #fff;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,34,255,0.35); margin-top: 6px;
+    transition: opacity 0.12s;
+}
+.rich-send-btn:active { opacity: 0.85; }
+.poll-option-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.poll-option-row .rich-input { flex: 1; margin-bottom: 0; }
+.poll-remove-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: none;
+    background: rgba(220,53,69,0.12); color: #dc3545; font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.add-option-btn {
+    border: 1px dashed rgba(13,110,253,0.4); background: none; border-radius: 12px;
+    padding: 7px 14px; font-size: 13px; color: #0d6efd; cursor: pointer; width: 100%;
+    margin-bottom: 10px; transition: background 0.12s;
+}
+.add-option-btn:active { background: rgba(13,110,253,0.07); }
+
+/* ── Rich message cards ──────────────────────────────────────────────────── */
+.card-bubble {
+    border-radius: 16px; overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    min-width: 220px; max-width: 280px;
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.dark-mode .card-bubble { background: rgba(30,30,50,0.75); border-color: rgba(255,255,255,0.1); }
+.card-header {
+    padding: 10px 14px 8px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;
+}
+.card-body { padding: 4px 14px 12px; }
+.card-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.card-sub { font-size: 12px; color: #777; line-height: 1.5; }
+.dark-mode .card-sub { color: #aaa; }
+
+/* Poll card */
+.poll-header { background: rgba(13,110,253,0.12); color: #0d6efd; }
+.poll-option-btn {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%; padding: 7px 0; border: none; background: none;
+    cursor: pointer; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: background 0.12s; border-radius: 6px; padding: 7px 8px; margin-bottom: 3px;
+}
+.poll-option-btn:active { background: rgba(13,110,253,0.07); }
+.poll-bar-wrap { flex: 1; }
+.poll-bar-label { font-size: 13px; font-weight: 500; }
+.poll-bar-track { height: 4px; background: rgba(0,0,0,0.07); border-radius: 4px; margin-top: 3px; }
+.poll-bar-fill { height: 100%; background: #0d6efd; border-radius: 4px; transition: width 0.3s; }
+.poll-pct { font-size: 11px; color: #888; font-weight: 600; min-width: 32px; text-align: right; }
+.dark-mode .poll-option-btn { border-bottom-color: rgba(255,255,255,0.06); }
+.dark-mode .poll-bar-label { color: #e2e2e2; }
+.dark-mode .poll-pct { color: #aaa; }
+.dark-mode .poll-bar-track { background: rgba(255,255,255,0.1); }
+
+/* Event card */
+.event-header { background: rgba(255,31,58,0.1); color: #ff1f3a; }
+.event-date-badge {
+    background: linear-gradient(135deg,#ff3355,#ff0022); color: #fff;
+    border-radius: 10px; padding: 6px 10px; text-align: center; flex-shrink: 0;
+    min-width: 46px;
+}
+.event-date-day { font-size: 20px; font-weight: 800; line-height: 1; }
+.event-date-mon { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.event-info-row { display: flex; gap: 10px; align-items: flex-start; }
+
+/* Doc card */
+.doc-header { background: rgba(108,117,125,0.12); color: #495057; }
+.dark-mode .doc-header { color: #ccc; }
+.doc-icon { font-size: 28px; flex-shrink: 0; }
+.doc-download-btn {
+    display: block; width: 100%; padding: 7px; border-radius: 10px; border: none;
+    background: rgba(13,110,253,0.1); color: #0d6efd; font-size: 13px; font-weight: 600;
+    cursor: pointer; margin-top: 8px; text-align: center; text-decoration: none;
+    transition: background 0.12s;
+}
+.doc-download-btn:active { background: rgba(13,110,253,0.2); }
+
+/* Contact card */
+.contact-header { background: rgba(37,211,102,0.12); color: #16a34a; }
+.contact-avatar-circle {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg,#25d366,#128c7e);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #fff; flex-shrink: 0; font-weight: 700;
+}
+.contact-info-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.contact-name { font-size: 15px; font-weight: 700; }
+.contact-detail { font-size: 12px; color: #777; }
+.dark-mode .contact-detail { color: #aaa; }
+.contact-action-row { display: flex; gap: 6px; }
+.contact-action-btn {
+    flex: 1; padding: 6px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: background 0.12s; text-decoration: none; text-align: center;
+    display: block;
+}
+.contact-action-btn.call  { background: rgba(37,211,102,0.15); color: #16a34a; }
+.contact-action-btn.email { background: rgba(13,110,253,0.12); color: #0d6efd; }
+
+/* Audio file card */
+.audio-header { background: rgba(156,39,176,0.12); color: #7b1fa2; }
 </style>
 </head>
 <body>
@@ -1755,6 +1900,36 @@ html.dark-mode, body.dark-mode {
                 <line x1="14" y1="11" x2="14" y2="17"/>
             </svg>
             <span>Clear</span>
+        </button>
+
+        <!-- Camera -->
+        <button class="tray-btn" onclick="openCamera(); closeTray();" title="Camera">
+            <span class="tray-icon">📸</span><span>Camera</span>
+        </button>
+
+        <!-- Poll -->
+        <button class="tray-btn" onclick="openPollModal(); closeTray();" title="Poll">
+            <span class="tray-icon">📊</span><span>Poll</span>
+        </button>
+
+        <!-- Event -->
+        <button class="tray-btn" onclick="openEventModal(); closeTray();" title="Event">
+            <span class="tray-icon">📅</span><span>Event</span>
+        </button>
+
+        <!-- Send Doc -->
+        <button class="tray-btn" onclick="document.getElementById('docInput').click(); closeTray();" title="Document">
+            <span class="tray-icon">📄</span><span>Doc</span>
+        </button>
+
+        <!-- Send Contact -->
+        <button class="tray-btn" onclick="openContactModal(); closeTray();" title="Contact">
+            <span class="tray-icon">👤</span><span>Contact</span>
+        </button>
+
+        <!-- Send Audio File -->
+        <button class="tray-btn" onclick="document.getElementById('audioFileInput').click(); closeTray();" title="Audio">
+            <span class="tray-icon">🎵</span><span>Audio</span>
         </button>
 
     </div>
@@ -2007,6 +2182,48 @@ html.dark-mode, body.dark-mode {
     </div>
 </div>
 
+<!-- Hidden file inputs for public chat -->
+<input type="file" id="docInput"       accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" style="display:none">
+<input type="file" id="audioFileInput" accept="audio/*" style="display:none">
+<input type="file" id="cameraInput"    accept="image/*" capture="environment"   style="display:none">
+
+<!-- Poll modal -->
+<div class="rich-modal" id="pollModal" onclick="if(event.target===this)closePollModal()">
+    <div class="rich-panel">
+        <div class="settings-title"><span>📊 Create Poll</span><button class="settings-close" onclick="closePollModal()">×</button></div>
+        <input class="rich-input" id="pollQuestion" placeholder="Question…" maxlength="120">
+        <div id="pollOptionsWrap">
+            <div class="poll-option-row"><input class="rich-input" placeholder="Option 1" maxlength="80"><button class="poll-remove-btn" onclick="removePollOption(this)">×</button></div>
+            <div class="poll-option-row"><input class="rich-input" placeholder="Option 2" maxlength="80"><button class="poll-remove-btn" onclick="removePollOption(this)">×</button></div>
+        </div>
+        <button class="add-option-btn" onclick="addPollOption()">+ Add option</button>
+        <button class="rich-send-btn" onclick="sendPoll()">Send Poll</button>
+    </div>
+</div>
+
+<!-- Event modal -->
+<div class="rich-modal" id="eventModal" onclick="if(event.target===this)closeEventModal()">
+    <div class="rich-panel">
+        <div class="settings-title"><span>📅 Create Event</span><button class="settings-close" onclick="closeEventModal()">×</button></div>
+        <input class="rich-input" id="eventTitle"    placeholder="Event title…"    maxlength="100">
+        <input class="rich-input" id="eventDate"     type="date">
+        <input class="rich-input" id="eventTime"     type="time">
+        <input class="rich-input" id="eventLocation" placeholder="Location (optional)" maxlength="100">
+        <button class="rich-send-btn" onclick="sendEvent()">Send Event</button>
+    </div>
+</div>
+
+<!-- Contact modal -->
+<div class="rich-modal" id="contactModal" onclick="if(event.target===this)closeContactModal()">
+    <div class="rich-panel">
+        <div class="settings-title"><span>👤 Share Contact</span><button class="settings-close" onclick="closeContactModal()">×</button></div>
+        <input class="rich-input" id="contactName"  placeholder="Name…"  maxlength="60">
+        <input class="rich-input" id="contactPhone" placeholder="Phone…" maxlength="30" type="tel">
+        <input class="rich-input" id="contactEmail" placeholder="Email (optional)" maxlength="80" type="email">
+        <button class="rich-send-btn" onclick="sendContact()">Share Contact</button>
+    </div>
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -2232,6 +2449,97 @@ function appendMessage(msg) {
     } else if (msg.audio_data) {
         $bubble.append($('<audio controls>').attr('src', msg.audio_data));
         isMedia = true;
+    } else if (msg.poll_id) {
+        $bubble.addClass('bubble-card');
+        var options = JSON.parse(msg.poll_options || '[]');
+        var $card = $('<div class="card-bubble">');
+        $card.append('<div class="card-header poll-header">📊 Poll</div>');
+        var $body = $('<div class="card-body">');
+        $body.append($('<div class="card-title">').text(msg.poll_question));
+        options.forEach(function (opt, i) {
+            var $btn = $('<button class="poll-option-btn">');
+            var $bw = $('<div class="poll-bar-wrap">');
+            $bw.append($('<div class="poll-bar-label">').text(opt));
+            $bw.append('<div class="poll-bar-track"><div class="poll-bar-fill" style="width:0%"></div></div>');
+            $btn.append($bw);
+            (function(pollId, idx){ $btn.on('click', function(){ votePoll(pollId, idx); }); })(msg.poll_id, i);
+            $body.append($btn);
+        });
+        $card.append($body);
+        $bubble.append($card);
+        // Listen for vote updates
+        (function(pollId, $body, options){
+            try {
+                firebase.database().ref('polls/' + pollId + '/votes').on('value', function(snap){
+                    var votes = snap.val() || {};
+                    var counts = options.map(function(){ return 0; });
+                    Object.values(votes).forEach(function(v){ if (counts[v] !== undefined) counts[v]++; });
+                    var total = counts.reduce(function(a,b){ return a+b; }, 0) || 1;
+                    $body.find('.poll-bar-fill').each(function(i){
+                        $(this).css('width', Math.round(counts[i]/total*100) + '%');
+                    });
+                });
+            } catch(e){}
+        })(msg.poll_id, $body, options);
+        isMedia = false;
+    } else if (msg.event_title) {
+        var dateParts = msg.event_date ? msg.event_date.split('-') : [];
+        var mon = dateParts[1] ? ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+dateParts[1]] : '';
+        var $card = $('<div class="card-bubble">');
+        $card.append('<div class="card-header" style="background:rgba(255,152,0,0.12);color:#e65100;">📅 Event</div>');
+        var $body = $('<div class="card-body" style="display:flex;gap:12px;align-items:flex-start;">');
+        if (dateParts[2]) {
+            var $badge = $('<div class="event-date-badge">');
+            $badge.append($('<div class="event-date-day">').text(+dateParts[2]));
+            $badge.append($('<div class="event-date-mon">').text(mon));
+            $body.append($badge);
+        }
+        var $info = $('<div style="flex:1">');
+        $info.append($('<div class="card-title">').text(msg.event_title));
+        var sub = [];
+        if (msg.event_time) sub.push('🕐 ' + msg.event_time);
+        if (msg.event_location) sub.push('📍 ' + msg.event_location);
+        if (sub.length) $info.append($('<div class="card-sub">').text(sub.join('  ')));
+        $body.append($info);
+        $card.append($body);
+        $bubble.append($card);
+        isMedia = false;
+    } else if (msg.doc_data) {
+        var $card = $('<div class="card-bubble">');
+        $card.append('<div class="card-header" style="background:rgba(33,150,243,0.12);color:#1565c0;">📄 Document</div>');
+        var $body = $('<div class="card-body">');
+        $body.append($('<div class="card-title">').text(msg.doc_name || 'File'));
+        if (msg.doc_size) $body.append($('<div class="card-sub">').text(Math.round(msg.doc_size/1024) + ' KB'));
+        var $dl = $('<a class="doc-download-btn" download>').attr('href', msg.doc_data).attr('download', msg.doc_name || 'file').text('⬇ Download');
+        $body.append($dl);
+        $card.append($body);
+        $bubble.append($card);
+        isMedia = false;
+    } else if (msg.contact_name) {
+        var $card = $('<div class="card-bubble">');
+        $card.append('<div class="card-header" style="background:rgba(76,175,80,0.12);color:#2e7d32;">👤 Contact</div>');
+        var $body = $('<div class="card-body" style="display:flex;gap:12px;align-items:center;">');
+        var $circ = $('<div class="contact-avatar-circle">').text(msg.contact_name.charAt(0).toUpperCase());
+        $body.append($circ);
+        var $info = $('<div>');
+        $info.append($('<div class="card-title">').text(msg.contact_name));
+        var sub2 = [];
+        if (msg.contact_phone) sub2.push('📞 ' + msg.contact_phone);
+        if (msg.contact_email) sub2.push('✉ ' + msg.contact_email);
+        if (sub2.length) $info.append($('<div class="card-sub">').html(sub2.join('<br>')));
+        $body.append($info);
+        $card.append($body);
+        $bubble.append($card);
+        isMedia = false;
+    } else if (msg.audio_file_data) {
+        var $card = $('<div class="card-bubble">');
+        $card.append('<div class="card-header audio-header">🎵 Audio</div>');
+        var $body = $('<div class="card-body">');
+        $body.append($('<div class="card-sub" style="margin-bottom:8px;">').text(msg.audio_file_name || 'Audio file'));
+        $body.append($('<audio controls style="width:100%;margin-top:4px;">').attr('src', msg.audio_file_data));
+        $card.append($body);
+        $bubble.append($card);
+        isMedia = false;
     } else {
         if (msg.message) {
             $bubble.append($('<span>').html(embedUrls(msg.message)));
@@ -2361,6 +2669,134 @@ function postToFirebase(extra) {
 function clearLocalView() {
     document.getElementById('conDivID').innerHTML = '';
     playClearSound();
+}
+
+// ── Camera ────────────────────────────────────────────────────────────────────
+function openCamera() {
+    document.getElementById('cameraInput').click();
+}
+(function () {
+    window.addEventListener('load', function () {
+        document.getElementById('cameraInput').onchange = function () {
+            var file = this.files[0]; if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var img = new Image();
+                img.onload = function () {
+                    var MAX = 800;
+                    var w = img.width, h = img.height;
+                    if (w > MAX || h > MAX) {
+                        var r = Math.min(MAX / w, MAX / h);
+                        w = Math.round(w * r); h = Math.round(h * r);
+                    }
+                    var c = document.createElement('canvas'); c.width = w; c.height = h;
+                    c.getContext('2d').drawImage(img, 0, 0, w, h);
+                    postToFirebase({ image_data: c.toDataURL('image/jpeg', 0.82) });
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            this.value = '';
+        };
+
+        document.getElementById('docInput').onchange = function () {
+            var file = this.files[0]; if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                postToFirebase({ doc_data: e.target.result, doc_name: file.name, doc_size: file.size });
+            };
+            reader.readAsDataURL(file);
+            this.value = '';
+        };
+
+        document.getElementById('audioFileInput').onchange = function () {
+            var file = this.files[0]; if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                postToFirebase({ audio_file_data: e.target.result, audio_file_name: file.name });
+            };
+            reader.readAsDataURL(file);
+            this.value = '';
+        };
+    });
+})();
+
+// ── Poll ──────────────────────────────────────────────────────────────────────
+function openPollModal()  { document.getElementById('pollModal').classList.add('show'); }
+function closePollModal() { document.getElementById('pollModal').classList.remove('show'); }
+
+function addPollOption() {
+    var wrap = document.getElementById('pollOptionsWrap');
+    var idx  = wrap.children.length + 1;
+    if (idx > 8) return;
+    var row = document.createElement('div');
+    row.className = 'poll-option-row';
+    row.innerHTML = '<input class="rich-input" placeholder="Option ' + idx + '" maxlength="80">'
+                  + '<button class="poll-remove-btn" onclick="removePollOption(this)">×</button>';
+    wrap.appendChild(row);
+}
+
+function removePollOption(btn) {
+    var wrap = document.getElementById('pollOptionsWrap');
+    if (wrap.children.length <= 2) return;
+    btn.closest('.poll-option-row').remove();
+}
+
+function sendPoll() {
+    var question = document.getElementById('pollQuestion').value.trim();
+    if (!question) { alert('Enter a question.'); return; }
+    var options = [];
+    document.querySelectorAll('#pollOptionsWrap .rich-input').forEach(function (el) {
+        var v = el.value.trim(); if (v) options.push(v);
+    });
+    if (options.length < 2) { alert('Add at least 2 options.'); return; }
+    var pollId = 'poll_' + Date.now();
+    var pollData = { question: question, options: options, votes: {} };
+    try { firebase.database().ref('polls/' + pollId).set(pollData); } catch (e) {}
+    postToFirebase({ poll_id: pollId, poll_question: question, poll_options: JSON.stringify(options) });
+    closePollModal();
+    document.getElementById('pollQuestion').value = '';
+    document.querySelectorAll('#pollOptionsWrap .rich-input').forEach(function (el, i) {
+        el.value = ''; if (i >= 2) el.closest('.poll-option-row').remove();
+    });
+}
+
+function votePoll(pollId, optionIndex) {
+    var me = localStorage.getItem('myUserName') || 'anon';
+    try { firebase.database().ref('polls/' + pollId + '/votes/' + me).set(optionIndex); } catch (e) {}
+}
+
+// ── Event ─────────────────────────────────────────────────────────────────────
+function openEventModal()  { document.getElementById('eventModal').classList.add('show'); }
+function closeEventModal() { document.getElementById('eventModal').classList.remove('show'); }
+
+function sendEvent() {
+    var title    = document.getElementById('eventTitle').value.trim();
+    var date     = document.getElementById('eventDate').value;
+    var time     = document.getElementById('eventTime').value;
+    var location = document.getElementById('eventLocation').value.trim();
+    if (!title || !date) { alert('Enter a title and date.'); return; }
+    postToFirebase({ event_title: title, event_date: date, event_time: time, event_location: location });
+    closeEventModal();
+    ['eventTitle','eventDate','eventTime','eventLocation'].forEach(function (id) {
+        document.getElementById(id).value = '';
+    });
+}
+
+// ── Contact ───────────────────────────────────────────────────────────────────
+function openContactModal()  { document.getElementById('contactModal').classList.add('show'); }
+function closeContactModal() { document.getElementById('contactModal').classList.remove('show'); }
+
+function sendContact() {
+    var name  = document.getElementById('contactName').value.trim();
+    var phone = document.getElementById('contactPhone').value.trim();
+    var email = document.getElementById('contactEmail').value.trim();
+    if (!name || !phone) { alert('Enter a name and phone number.'); return; }
+    postToFirebase({ contact_name: name, contact_phone: phone, contact_email: email });
+    closeContactModal();
+    ['contactName','contactPhone','contactEmail'].forEach(function (id) {
+        document.getElementById(id).value = '';
+    });
 }
 
 // ── Voice recording ───────────────────────────────────────────────────────────
