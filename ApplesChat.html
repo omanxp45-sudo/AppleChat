@@ -1736,6 +1736,94 @@ html.dark-mode, body.dark-mode {
 
 /* Audio file card */
 .audio-header { background: rgba(156,39,176,0.12); color: #7b1fa2; }
+
+/* ── Reactions ── */
+.msg-reactions { display:flex; gap:4px; margin-top:4px; }
+.msg-row.me .msg-reactions { justify-content:flex-end; }
+.react-btn {
+    display:flex; align-items:center; gap:3px; padding:2px 8px;
+    border-radius:12px; border:1px solid rgba(0,0,0,0.1);
+    background:rgba(255,255,255,0.7); font-size:12px; cursor:pointer;
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    transition:background 0.12s, transform 0.1s; color:#444;
+}
+.react-btn:active { transform:scale(0.93); }
+.react-btn.liked    { background:rgba(37,211,102,0.18); border-color:rgba(37,211,102,0.4); }
+.react-btn.disliked { background:rgba(220,53,69,0.13);  border-color:rgba(220,53,69,0.3); }
+.dark-mode .react-btn { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.15); color:#eee; }
+
+/* ── Link preview ── */
+.link-preview-card {
+    display:flex; flex-direction:column; margin-top:8px; border-radius:12px;
+    overflow:hidden; border:1px solid rgba(0,0,0,0.1); max-width:280px;
+    background:rgba(255,255,255,0.85); text-decoration:none; color:inherit;
+    cursor:pointer; transition:opacity 0.15s;
+}
+.link-preview-card:hover { opacity:0.85; }
+.link-preview-thumb { width:100%; max-height:130px; object-fit:cover; display:block; }
+.link-preview-info { padding:8px 10px; }
+.link-preview-site  { font-size:10px; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:2px; }
+.link-preview-title { font-size:13px; font-weight:700; line-height:1.3; margin-bottom:2px; }
+.link-preview-desc  { font-size:11px; color:#666; line-height:1.4; }
+.dark-mode .link-preview-card  { background:rgba(30,30,50,0.88); border-color:rgba(255,255,255,0.1); }
+.dark-mode .link-preview-title { color:#eee; }
+.dark-mode .link-preview-desc  { color:#aaa; }
+
+/* ── Add-friend button in message badge ── */
+.add-friend-btn {
+    background:none; border:none; cursor:pointer; font-size:13px;
+    padding:3px 5px; border-radius:6px; opacity:0.65; line-height:1;
+    transition:opacity 0.12s, background 0.12s;
+}
+.add-friend-btn:hover { opacity:1; background:rgba(13,110,253,0.1); }
+
+/* ── Friends modal ── */
+.friends-modal { display:none; position:fixed; inset:0; z-index:7200; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; }
+.friends-modal.show { display:flex; }
+.friends-panel {
+    background:#fff; border-radius:20px; width:min(380px,calc(100vw - 28px));
+    max-height:76vh; display:flex; flex-direction:column;
+    box-shadow:0 12px 40px rgba(0,0,0,0.2); overflow:hidden;
+}
+.dark-mode .friends-panel { background:#1e1e2e; }
+.friends-panel-hdr { padding:16px 18px; font-size:16px; font-weight:700; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(0,0,0,0.07); flex-shrink:0; }
+.dark-mode .friends-panel-hdr { border-bottom-color:rgba(255,255,255,0.08); }
+.friends-list { flex:1; overflow-y:auto; padding:6px 0; }
+.friend-row { display:flex; align-items:center; gap:10px; padding:10px 16px; transition:background 0.12s; }
+.friend-row:hover { background:rgba(0,0,0,0.04); }
+.dark-mode .friend-row:hover { background:rgba(255,255,255,0.06); }
+.friend-av { width:40px; height:40px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+.friend-info { flex:1; min-width:0; }
+.friend-name { font-size:14px; font-weight:600; }
+.friend-status-txt { font-size:11px; color:#888; }
+.friend-dm-btn   { background:rgba(13,110,253,0.1); color:#0d6efd; border:none; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:600; cursor:pointer; }
+.friend-del-btn  { background:rgba(220,53,69,0.1); color:#dc3545; border:none; border-radius:8px; padding:5px 8px; font-size:13px; cursor:pointer; }
+.friends-empty { text-align:center; padding:32px; color:#aaa; font-size:14px; }
+
+/* ── Rooms panel ── */
+.rooms-modal { display:none; position:fixed; inset:0; z-index:7200; background:rgba(0,0,0,0.45); align-items:flex-end; justify-content:center; }
+.rooms-modal.show { display:flex; }
+.rooms-panel {
+    background:#fff; border-radius:20px 20px 0 0; width:100%; max-width:520px;
+    max-height:65vh; display:flex; flex-direction:column;
+    box-shadow:0 -4px 30px rgba(0,0,0,0.15); animation:slideUp .25s ease;
+}
+.dark-mode .rooms-panel { background:#1e1e2e; }
+.rooms-panel-hdr { padding:14px 18px 8px; font-size:16px; font-weight:700; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+.rooms-list { flex:1; overflow-y:auto; padding:4px 12px 16px; display:flex; flex-direction:column; gap:5px; }
+.room-btn {
+    display:flex; align-items:center; gap:12px; padding:11px 14px;
+    border-radius:14px; border:1.5px solid transparent; background:rgba(0,0,0,0.03);
+    cursor:pointer; font-size:14px; font-weight:500; transition:all 0.15s; text-align:left; width:100%;
+}
+.room-btn:hover { background:rgba(13,110,253,0.07); border-color:rgba(13,110,253,0.2); }
+.room-btn.active { background:rgba(13,110,253,0.12); border-color:rgba(13,110,253,0.4); color:#0d6efd; font-weight:700; }
+.dark-mode .room-btn { background:rgba(255,255,255,0.04); }
+.dark-mode .room-btn:hover { background:rgba(255,255,255,0.08); }
+.room-flag { font-size:24px; flex-shrink:0; }
+.room-name { font-size:14px; font-weight:600; }
+.room-sub  { font-size:11px; color:#888; }
+.room-active-badge { background:#0d6efd; color:#fff; border-radius:10px; font-size:10px; font-weight:700; padding:2px 7px; margin-left:auto; }
 </style>
 </head>
 <body>
@@ -1751,6 +1839,8 @@ html.dark-mode, body.dark-mode {
                 <span id="onlineCount">Connecting…</span>
             </span>
         </div>
+        <button class="header-settings-btn" onclick="openRoomsPanel()" title="Rooms">🌍</button>
+        <button class="header-settings-btn" onclick="openFriendsModal()" title="Friends">👥</button>
         <button class="header-settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
         <a class="header-user" href="index.html" title="Edit profile">
             <img class="header-avatar" id="avatar" src="https://i.imgur.com/PVBYWRJ.png" alt="Avatar">
@@ -2452,16 +2542,31 @@ function closeTray() {
 }
 
 // ── Firebase ──────────────────────────────────────────────────────────────────
-var initialLoadDone = false;
+var initialLoadDone  = false;
+var _currentRoomPath = 'messages';
+var _currentRoomName = '🌐 Global';
+var _mainRef         = null;
 
-function connectFirebase() {
+function connectFirebase() { connectToRoom(_currentRoomPath); }
+
+function connectToRoom(path) {
+    _currentRoomPath = path;
     try {
         var db  = firebase.database();
-        var ref = db.ref('messages').orderByChild('created_at').limitToLast(50);
+        if (_mainRef) { _mainRef.off(); _mainRef = null; }
+        document.getElementById('conDivID').innerHTML = '';
+        initialLoadDone = false;
+
+        var ref = db.ref(path).orderByChild('created_at').limitToLast(50);
+        _mainRef = ref;
 
         ref.once('value', function (snapshot) {
             var rows = [];
-            snapshot.forEach(function (child) { rows.push(child.val()); });
+            snapshot.forEach(function (child) {
+                var msg = child.val();
+                msg._fbKey = child.key;
+                rows.push(msg);
+            });
             rows.forEach(appendMessage);
             scrollToBottom();
             setStatus('');
@@ -2473,9 +2578,9 @@ function connectFirebase() {
         ref.on('child_added', function (snapshot) {
             if (!initialLoadDone) return;
             var msg = snapshot.val();
+            msg._fbKey = snapshot.key;
             appendMessage(msg);
             scrollToBottom();
-            // Push notification for messages from others
             var me = localStorage.getItem('myUserName') || '';
             if (msg.username && msg.username !== me) {
                 _showNotification(msg.username, msg.message || (msg.image_data ? '📷 Image' : msg.sticker_url ? '😊 Sticker' : '🎤 Voice note'), msg.avatar);
@@ -2557,6 +2662,10 @@ function appendMessage(msg) {
         var $blockBtn = $('<button class="block-btn" title="Block user">🚫</button>');
         $blockBtn.attr('onclick', '_blockFromMsg("' + msg.username.replace(/"/g,'') + '"); event.stopPropagation();');
         $nameRow.append($blockBtn);
+        // Add Friend button
+        var $afBtn = $('<button class="add-friend-btn" title="Add Friend">👥+</button>');
+        (function(u,av){ $afBtn.on('click', function(e){ e.stopPropagation(); addFriend(u, av); }); })(msg.username, msg.avatar||'');
+        $nameRow.append($afBtn);
         $wrap.append($nameRow);
     }
 
@@ -2704,6 +2813,37 @@ function appendMessage(msg) {
     if (isMedia && ts) {
         $wrap.append('<div class="msg-time">' + ts + '</div>');
     }
+
+    // ── Link preview for text messages containing a URL ──
+    if (msg.message && /https?:\/\//.test(msg.message)) {
+        var _urlM = msg.message.match(/(https?:\/\/[^\s]+)/);
+        if (_urlM) { (function(url, $b){ setTimeout(function(){ _fetchLinkPreview(url, $b); }, 200); })(_urlM[1], $bubble); }
+    }
+
+    // ── Reactions (like / dislike) ──
+    if (msg._fbKey) {
+        var _rKey = msg._fbKey;
+        var $reacts = $('<div class="msg-reactions">');
+        var $likeBtn    = $('<button class="react-btn">').html('👍 <span>0</span>');
+        var $dislikeBtn = $('<button class="react-btn">').html('👎 <span>0</span>');
+        $likeBtn.on('click',    function(){ _toggleReaction(_rKey, 'like'); });
+        $dislikeBtn.on('click', function(){ _toggleReaction(_rKey, 'dislike'); });
+        $reacts.append($likeBtn).append($dislikeBtn);
+        $wrap.append($reacts);
+        try {
+            firebase.database().ref('reactions/' + _rKey).on('value', function(snap){
+                var d  = snap.val() || {};
+                var me = localStorage.getItem('myUserName') || '';
+                var lk = d.likes    ? Object.keys(d.likes).length    : 0;
+                var dl = d.dislikes ? Object.keys(d.dislikes).length : 0;
+                $likeBtn.find('span').text(lk || '');
+                $dislikeBtn.find('span').text(dl || '');
+                $likeBtn.toggleClass('liked',    !!(d.likes    && d.likes[me]));
+                $dislikeBtn.toggleClass('disliked', !!(d.dislikes && d.dislikes[me]));
+            });
+        } catch(e){}
+    }
+
     $row.append($wrap);
     $('#conDivID').append($row);
 }
@@ -2784,7 +2924,7 @@ function postToFirebase(extra) {
     }, extra);
 
     try {
-        firebase.database().ref('messages').push(payload)
+        firebase.database().ref(_currentRoomPath).push(payload)
             .catch(function (err) { setStatus('Send failed: ' + err.message); });
     } catch (err) {
         setStatus('Firebase not configured — add your keys to firebase-config.js');
@@ -3648,8 +3788,171 @@ function _startCallTimer() {
 
 // Patch ESC key to also close overlays
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { closePM(); closeSettings(); closeBlockedList(); endCall(); }
+    if (e.key === 'Escape') { closePM(); closeSettings(); closeBlockedList(); endCall(); closeFriendsModal(); closeRoomsPanel(); }
 });
+
+// ── Reactions ─────────────────────────────────────────────────────────────────
+function _toggleReaction(msgKey, type) {
+    var me = localStorage.getItem('myUserName') || '';
+    if (!me) return;
+    var ref = firebase.database().ref('reactions/' + msgKey);
+    ref.once('value', function(snap) {
+        var d = snap.val() || {};
+        var path = type === 'like' ? 'likes' : 'dislikes';
+        var opp  = type === 'like' ? 'dislikes' : 'likes';
+        var update = {};
+        if (d[path] && d[path][me]) {
+            update[path + '/' + me] = null; // un-react
+        } else {
+            update[path + '/' + me] = true;
+            update[opp  + '/' + me] = null; // remove opposite
+        }
+        ref.update(update);
+    });
+}
+
+// ── Link Preview ──────────────────────────────────────────────────────────────
+function _fetchLinkPreview(url, $bubble) {
+    fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url))
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        var html = data.contents || '';
+        function getOg(p) {
+            var m = html.match(new RegExp('<meta[^>]+property=["\']og:'+p+'["\'][^>]+content=["\']([^"\']*)["\']','i'));
+            if (!m) m = html.match(new RegExp('<meta[^>]+content=["\']([^"\']*)["\'][^>]+property=["\']og:'+p+'["\']','i'));
+            return m ? m[1] : '';
+        }
+        var title = getOg('title') || (html.match(/<title[^>]*>([^<]+)<\/title>/i)||[])[1] || '';
+        var desc  = getOg('description');
+        var img   = getOg('image');
+        var site  = getOg('site_name') || (url.match(/^https?:\/\/([^/]+)/)||[])[1] || '';
+        if (!title && !img) return;
+        var $card = $('<a class="link-preview-card" target="_blank" rel="noopener">').attr('href', url);
+        if (img) $card.append($('<img class="link-preview-thumb">').attr('src', img));
+        var $info = $('<div class="link-preview-info">');
+        if (site)  $info.append($('<div class="link-preview-site">').text(site));
+        if (title) $info.append($('<div class="link-preview-title">').text(title.slice(0,80)));
+        if (desc)  $info.append($('<div class="link-preview-desc">').text(desc.slice(0,120)));
+        $card.append($info);
+        $bubble.append($card);
+    }).catch(function(){});
+}
+
+// ── Friends ───────────────────────────────────────────────────────────────────
+function openFriendsModal() {
+    document.getElementById('friendsModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    _loadFriends();
+}
+function closeFriendsModal() {
+    document.getElementById('friendsModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+function addFriend(username, avatar) {
+    var me = localStorage.getItem('myUserName') || '';
+    if (!me || username === me) return;
+    firebase.database().ref('friends/' + me + '/' + username).set({ avatar: avatar || '', addedAt: firebase.database.ServerValue.TIMESTAMP });
+    // Visual feedback
+    var btn = event && event.target;
+    if (btn) { var orig = btn.textContent; btn.textContent = '✓'; setTimeout(function(){ btn.textContent = orig; }, 1200); }
+}
+function removeFriend(username) {
+    var me = localStorage.getItem('myUserName') || '';
+    if (!me) return;
+    firebase.database().ref('friends/' + me + '/' + username).remove();
+}
+function _loadFriends() {
+    var me = localStorage.getItem('myUserName') || '';
+    var $list = $('#friendsList');
+    $list.html('<div class="friends-empty">Loading…</div>');
+    if (!me) return;
+    firebase.database().ref('friends/' + me).once('value', function(snap) {
+        var friends = snap.val();
+        if (!friends || Object.keys(friends).length === 0) {
+            $list.html('<div class="friends-empty">No friends yet.<br>Tap 👥+ on any message to add.</div>');
+            return;
+        }
+        $list.empty();
+        Object.entries(friends).forEach(function(pair) {
+            var uname = pair[0], data = pair[1];
+            var $row = $('<div class="friend-row">');
+            var av = data.avatar || 'https://i.imgur.com/PVBYWRJ.png';
+            $row.append($('<img class="friend-av">').attr('src', av));
+            var $info = $('<div class="friend-info">');
+            $info.append($('<div class="friend-name">').text(uname));
+            $row.append($info);
+            var $acts = $('<div style="display:flex;gap:6px">');
+            var $dm = $('<button class="friend-dm-btn">💬 DM</button>');
+            $dm.on('click', function(){ closeFriendsModal(); openPM(uname, av, ''); });
+            var $del = $('<button class="friend-del-btn">✕</button>');
+            $del.on('click', function(){ removeFriend(uname); $row.remove(); });
+            $acts.append($dm).append($del);
+            $row.append($acts);
+            $list.append($row);
+        });
+    });
+}
+
+// ── Rooms ─────────────────────────────────────────────────────────────────────
+var _myCountryCode = '';
+var _ROOMS = [
+    { path:'messages',    flag:'🌐', name:'Global',        sub:'Everyone' },
+    { path:'rooms_US',    flag:'🇺🇸', name:'United States',  sub:'#us' },
+    { path:'rooms_GB',    flag:'🇬🇧', name:'United Kingdom', sub:'#uk' },
+    { path:'rooms_SA',    flag:'🇸🇦', name:'Saudi Arabia',   sub:'#sa' },
+    { path:'rooms_AE',    flag:'🇦🇪', name:'UAE',            sub:'#ae' },
+    { path:'rooms_EG',    flag:'🇪🇬', name:'Egypt',          sub:'#eg' },
+    { path:'rooms_IN',    flag:'🇮🇳', name:'India',          sub:'#in' },
+    { path:'rooms_PK',    flag:'🇵🇰', name:'Pakistan',       sub:'#pk' },
+    { path:'rooms_DE',    flag:'🇩🇪', name:'Germany',        sub:'#de' },
+    { path:'rooms_FR',    flag:'🇫🇷', name:'France',         sub:'#fr' },
+    { path:'rooms_BR',    flag:'🇧🇷', name:'Brazil',         sub:'#br' },
+    { path:'rooms_TR',    flag:'🇹🇷', name:'Turkey',         sub:'#tr' },
+    { path:'rooms_MA',    flag:'🇲🇦', name:'Morocco',        sub:'#ma' },
+];
+function openRoomsPanel() {
+    document.getElementById('roomsModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    _renderRooms();
+}
+function closeRoomsPanel() {
+    document.getElementById('roomsModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+function _renderRooms() {
+    var $list = $('#roomsList');
+    $list.empty();
+    // Detect country to highlight user's room
+    if (!_myCountryCode) {
+        fetch('https://ipapi.co/json/').then(function(r){ return r.json(); })
+        .then(function(d){ _myCountryCode = d.country_code || ''; _renderRooms(); })
+        .catch(function(){});
+    }
+    var rooms = _ROOMS.slice();
+    // Insert user's country room if not in list
+    if (_myCountryCode) {
+        var inList = rooms.some(function(r){ return r.path === 'rooms_' + _myCountryCode; });
+        if (!inList) {
+            rooms.splice(1, 0, { path:'rooms_'+_myCountryCode, flag:'🏳️', name:'My Country ('+_myCountryCode+')', sub:'#'+_myCountryCode.toLowerCase() });
+        }
+    }
+    rooms.forEach(function(room) {
+        var $btn = $('<button class="room-btn">');
+        if (room.path === _currentRoomPath) $btn.addClass('active');
+        $btn.append($('<span class="room-flag">').text(room.flag));
+        var $info = $('<span class="room-info">');
+        $info.append($('<div class="room-name">').text(room.name));
+        $info.append($('<div class="room-sub">').text(room.sub));
+        $btn.append($info);
+        if (room.path === _currentRoomPath) $btn.append($('<span class="room-active-badge">').text('Current'));
+        $btn.on('click', function(){
+            _currentRoomName = room.flag + ' ' + room.name;
+            closeRoomsPanel();
+            connectToRoom(room.path);
+        });
+        $list.append($btn);
+    });
+}
 
 function stopGoLive() {
     if (_liveInterval) { clearInterval(_liveInterval); _liveInterval = null; }
@@ -3935,6 +4238,28 @@ function _refreshUnreadBadges() {
 }
 
 </script>
+
+<!-- ── Friends Modal ─────────────────────────────────────────────────────── -->
+<div class="friends-modal" id="friendsModal" onclick="if(event.target===this)closeFriendsModal()">
+  <div class="friends-panel">
+    <div class="friends-panel-hdr">
+      <span>👥 Friends</span>
+      <button class="settings-close" onclick="closeFriendsModal()">×</button>
+    </div>
+    <div class="friends-list" id="friendsList"></div>
+  </div>
+</div>
+
+<!-- ── Rooms Modal ────────────────────────────────────────────────────────── -->
+<div class="rooms-modal" id="roomsModal" onclick="if(event.target===this)closeRoomsPanel()">
+  <div class="rooms-panel">
+    <div class="rooms-panel-hdr">
+      <span>🌍 Chat Rooms</span>
+      <button class="settings-close" onclick="closeRoomsPanel()">×</button>
+    </div>
+    <div class="rooms-list" id="roomsList"></div>
+  </div>
+</div>
 
 </body>
 </html>

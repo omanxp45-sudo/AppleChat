@@ -343,6 +343,39 @@ html.dark-mode, body.dark-mode {
 }
 .pm-modal-btn.primary { background: #0d6efd; color: #fff; }
 .pm-modal-btn.addrbook { background: rgba(37,211,102,0.15); color: #16a34a; border: 1px solid rgba(37,211,102,0.3); }
+
+/* ── Link preview ── */
+.link-preview-card { display:flex; flex-direction:column; margin-top:7px; border-radius:10px; overflow:hidden; border:1px solid rgba(0,0,0,0.1); background:rgba(255,255,255,0.88); text-decoration:none; color:inherit; max-width:260px; }
+.link-preview-thumb { width:100%; max-height:120px; object-fit:cover; display:block; }
+.link-preview-info  { padding:7px 9px; }
+.link-preview-site  { font-size:10px; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:2px; }
+.link-preview-title { font-size:13px; font-weight:700; line-height:1.3; margin-bottom:2px; }
+.link-preview-desc  { font-size:11px; color:#666; line-height:1.4; }
+.dark-mode .link-preview-card { background:rgba(30,30,50,0.88); border-color:rgba(255,255,255,0.12); }
+.dark-mode .link-preview-title { color:#eee; }
+.dark-mode .link-preview-desc  { color:#aaa; }
+
+/* ── Tic-tac-toe game ── */
+.game-overlay { display:none; position:fixed; inset:0; z-index:9500; background:rgba(0,0,0,0.55); align-items:center; justify-content:center; }
+.game-overlay.show { display:flex; }
+.game-panel { background:#fff; border-radius:20px; width:min(320px,calc(100vw - 32px)); padding:20px; box-shadow:0 12px 40px rgba(0,0,0,0.25); }
+.dark-mode .game-panel { background:#1e1e2e; color:#eee; }
+.game-title  { font-size:18px; font-weight:700; text-align:center; margin-bottom:4px; }
+.game-status { font-size:13px; text-align:center; color:#888; margin-bottom:14px; min-height:18px; }
+.ttt-board   { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+.ttt-cell    { aspect-ratio:1; border-radius:12px; background:rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:center; font-size:34px; cursor:pointer; border:2px solid transparent; transition:background .15s, border-color .15s; }
+.dark-mode .ttt-cell { background:rgba(255,255,255,0.07); }
+.ttt-cell:hover:not(.taken) { background:rgba(13,110,253,0.1); border-color:rgba(13,110,253,0.3); }
+.ttt-cell.taken  { cursor:default; }
+.ttt-cell.win-cell { background:rgba(37,211,102,0.22); border-color:rgba(37,211,102,0.55); }
+.game-btns { display:flex; gap:8px; }
+.game-btn  { flex:1; padding:10px; border:none; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; }
+.game-btn.primary   { background:#0d6efd; color:#fff; }
+.game-btn.secondary { background:rgba(0,0,0,0.07); color:#555; }
+.dark-mode .game-btn.secondary { background:rgba(255,255,255,0.1); color:#ddd; }
+/* Blocked banner */
+.pm-blocked-banner { background:rgba(220,53,69,0.12); color:#dc3545; text-align:center; padding:10px; font-size:13px; font-weight:600; display:none; }
+.pm-blocked-banner.show { display:block; }
 </style>
 </head>
 <body>
@@ -360,7 +393,11 @@ html.dark-mode, body.dark-mode {
             </div>
         </div>
         <button class="pm-header-btn" onclick="initiateCall()" title="Call">📞</button>
+        <button class="pm-header-btn" id="pmBlockBtn" onclick="toggleBlockPeer()" title="Block user">🚫</button>
     </div>
+
+    <!-- Blocked banner -->
+    <div class="pm-blocked-banner" id="pmBlockedBanner">🚫 You have blocked this user. <button onclick="toggleBlockPeer()" style="background:none;border:none;color:#dc3545;font-weight:700;cursor:pointer;text-decoration:underline;">Unblock</button></div>
 
     <!-- Messages -->
     <div class="pm-body" id="pmBody">
@@ -396,6 +433,10 @@ html.dark-mode, body.dark-mode {
         <!-- Audio file -->
         <button class="tray-btn" onclick="document.getElementById('pmAudioInput').click(); closeTray();" title="Audio">
             <span class="tray-icon">🎵</span><span>Audio</span>
+        </button>
+        <!-- Games -->
+        <button class="tray-btn" onclick="openGamePanel(); closeTray();" title="Games">
+            <span class="tray-icon">🎮</span><span>Games</span>
         </button>
         <!-- Stickers -->
         <div class="tray-sticker-wrap">
@@ -494,6 +535,8 @@ window.onload = function () {
 
     // Portal sticker menu to <body> so it escapes overflow:hidden/auto on the tray
     document.body.appendChild(document.getElementById('stickerMenu'));
+    // Block UI state
+    _updateBlockUI();
 
     // Apply saved theme
     if (localStorage.getItem('darkMode') === '1') {
@@ -771,6 +814,9 @@ function appendMsg(msg) {
             var sp = document.createElement('span');
             sp.innerHTML = embedUrls(msg.message);
             bubble.appendChild(sp);
+            // Link preview
+            var _urlM = msg.message.match(/(https?:\/\/[^\s]+)/);
+            if (_urlM) { (function(url,b){ setTimeout(function(){ _pmFetchLinkPreview(url,b); },200); })(_urlM[1], bubble); }
         }
         if (msg.image_data) {
             if (msg.message) bubble.appendChild(document.createElement('br'));
@@ -924,6 +970,149 @@ function openLightbox(src) {
 }
 function closeLightbox() {
     document.getElementById('lightboxOverlay').classList.remove('show');
+}
+</script>
+
+<!-- ── Game overlay (Tic-tac-toe) ────────────────────────────────────────── -->
+<div class="game-overlay" id="gameOverlay">
+  <div class="game-panel">
+    <div class="game-title">⭕❌ Tic-Tac-Toe</div>
+    <div class="game-status" id="gameStatus">Waiting for opponent…</div>
+    <div class="ttt-board" id="tttBoard">
+      <div class="ttt-cell" data-i="0" onclick="tttMove(0)"></div>
+      <div class="ttt-cell" data-i="1" onclick="tttMove(1)"></div>
+      <div class="ttt-cell" data-i="2" onclick="tttMove(2)"></div>
+      <div class="ttt-cell" data-i="3" onclick="tttMove(3)"></div>
+      <div class="ttt-cell" data-i="4" onclick="tttMove(4)"></div>
+      <div class="ttt-cell" data-i="5" onclick="tttMove(5)"></div>
+      <div class="ttt-cell" data-i="6" onclick="tttMove(6)"></div>
+      <div class="ttt-cell" data-i="7" onclick="tttMove(7)"></div>
+      <div class="ttt-cell" data-i="8" onclick="tttMove(8)"></div>
+    </div>
+    <div class="game-btns">
+      <button class="game-btn primary" onclick="tttNewGame()">New Game</button>
+      <button class="game-btn secondary" onclick="closeGamePanel()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Block peer ────────────────────────────────────────────────────────────────
+function _pmIsBlocked(u) {
+    try { return (JSON.parse(localStorage.getItem('blocked')||'[]')).includes(u); } catch(e){ return false; }
+}
+function toggleBlockPeer() {
+    var blocked = [];
+    try { blocked = JSON.parse(localStorage.getItem('blocked')||'[]'); } catch(e){}
+    var idx = blocked.indexOf(PEER);
+    if (idx >= 0) { blocked.splice(idx,1); } else { blocked.push(PEER); }
+    localStorage.setItem('blocked', JSON.stringify(blocked));
+    _updateBlockUI();
+}
+function _updateBlockUI() {
+    var isBlocked = _pmIsBlocked(PEER);
+    var btn = document.getElementById('pmBlockBtn');
+    if (btn) btn.title = isBlocked ? 'Unblock user' : 'Block user';
+    var banner = document.getElementById('pmBlockedBanner');
+    if (banner) banner.classList.toggle('show', isBlocked);
+    var inputBar = document.querySelector('.pm-input-bar');
+    if (inputBar) inputBar.style.pointerEvents = isBlocked ? 'none' : '';
+}
+
+// ── Link preview ──────────────────────────────────────────────────────────────
+function _pmFetchLinkPreview(url, container) {
+    fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url))
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        var html = data.contents || '';
+        function getOg(p) {
+            var m = html.match(new RegExp('<meta[^>]+property=["\']og:'+p+'["\'][^>]+content=["\']([^"\']*)["\']','i'));
+            if (!m) m = html.match(new RegExp('<meta[^>]+content=["\']([^"\']*)["\'][^>]+property=["\']og:'+p+'["\']','i'));
+            return m ? m[1] : '';
+        }
+        var title = getOg('title') || (html.match(/<title[^>]*>([^<]+)<\/title>/i)||[])[1] || '';
+        var desc  = getOg('description');
+        var img   = getOg('image');
+        var site  = getOg('site_name') || (url.match(/^https?:\/\/([^/]+)/)||[])[1] || '';
+        if (!title && !img) return;
+        var a = document.createElement('a');
+        a.className = 'link-preview-card'; a.href = url; a.target = '_blank'; a.rel = 'noopener';
+        if (img) { var im = document.createElement('img'); im.className='link-preview-thumb'; im.src=img; a.appendChild(im); }
+        var info = document.createElement('div'); info.className = 'link-preview-info';
+        if (site)  { var s=document.createElement('div'); s.className='link-preview-site';  s.textContent=site;              info.appendChild(s); }
+        if (title) { var t=document.createElement('div'); t.className='link-preview-title'; t.textContent=title.slice(0,80); info.appendChild(t); }
+        if (desc)  { var d=document.createElement('div'); d.className='link-preview-desc';  d.textContent=desc.slice(0,120); info.appendChild(d); }
+        a.appendChild(info);
+        container.appendChild(a);
+    }).catch(function(){});
+}
+
+// ── Tic-tac-toe ───────────────────────────────────────────────────────────────
+var _tttRef = null;
+var _tttMyMark = '';
+
+function openGamePanel() {
+    document.getElementById('gameOverlay').classList.add('show');
+    _tttConnect();
+}
+function closeGamePanel() {
+    document.getElementById('gameOverlay').classList.remove('show');
+    if (_tttRef) { _tttRef.off(); _tttRef = null; }
+}
+function _tttConnect() {
+    if (_tttRef) _tttRef.off();
+    _tttRef = firebase.database().ref('games/' + CHAT_ID);
+    _tttRef.on('value', function(snap) {
+        var g = snap.val();
+        if (!g) { document.getElementById('gameStatus').textContent = 'Start a new game!'; return; }
+        _tttRender(g);
+    });
+}
+function tttNewGame() {
+    var g = { board: ['','','','','','','','',''], X: ME, O: PEER, current: 'X', status: 'playing' };
+    firebase.database().ref('games/' + CHAT_ID).set(g);
+    sendMsg({ message: '🎮 Started a Tic-Tac-Toe game! Open Games in the tray to play.' });
+}
+function tttMove(i) {
+    if (!_tttRef) return;
+    _tttRef.once('value', function(snap) {
+        var g = snap.val();
+        if (!g || g.status !== 'playing') return;
+        var mark = g.X === ME ? 'X' : (g.O === ME ? 'O' : '');
+        if (!mark || g.current !== mark) return; // not your turn
+        if (g.board[i]) return; // cell taken
+        var board = g.board.slice();
+        board[i] = mark;
+        var winner = _tttCheckWinner(board);
+        var full   = board.every(function(c){ return c !== ''; });
+        var update = { board: board, current: mark === 'X' ? 'O' : 'X' };
+        if (winner) { update.status = 'won'; update.winner = ME; }
+        else if (full) { update.status = 'draw'; }
+        _tttRef.update(update);
+    });
+}
+function _tttCheckWinner(b) {
+    var lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    return lines.some(function(l){ return b[l[0]] && b[l[0]] === b[l[1]] && b[l[1]] === b[l[2]]; });
+}
+function _tttRender(g) {
+    var cells = document.querySelectorAll('.ttt-cell');
+    var winLine = null;
+    var lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    if (g.status === 'won') {
+        winLine = lines.find(function(l){ return g.board[l[0]] && g.board[l[0]]===g.board[l[1]] && g.board[l[1]]===g.board[l[2]]; });
+    }
+    cells.forEach(function(cell, i) {
+        cell.textContent = g.board[i] === 'X' ? '❌' : g.board[i] === 'O' ? '⭕' : '';
+        cell.classList.toggle('taken', !!g.board[i]);
+        cell.classList.toggle('win-cell', !!(winLine && winLine.includes(i)));
+    });
+    var myMark = g.X === ME ? 'X' : 'O';
+    var statusEl = document.getElementById('gameStatus');
+    if (g.status === 'won')        statusEl.textContent = g.winner === ME ? '🎉 You won!' : '😞 ' + g.winner + ' won!';
+    else if (g.status === 'draw')  statusEl.textContent = "🤝 It's a draw!";
+    else if (g.current === myMark) statusEl.textContent = '✅ Your turn (' + (myMark === 'X' ? '❌' : '⭕') + ')';
+    else                           statusEl.textContent = '⏳ Waiting for ' + PEER + '…';
 }
 </script>
 
