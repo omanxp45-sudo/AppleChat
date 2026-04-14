@@ -131,12 +131,20 @@ html, body {
 .pm-bubble.media-bubble {
     background: transparent !important;
     box-shadow: none !important; padding: 0 !important;
+    position: relative;
 }
 .pm-bubble.media-bubble::before,
 .pm-bubble.media-bubble::after { display: none; }
 .pm-bubble-ts {
     position: absolute; bottom: 4px; right: 8px;
     font-size: 10px; color: #999; white-space: nowrap; pointer-events: none;
+}
+.pm-bubble.media-bubble .pm-bubble-ts {
+    background: rgba(0,0,0,0.42);
+    color: #fff !important;
+    border-radius: 10px;
+    padding: 1px 6px;
+    z-index: 2;
 }
 .pm-bubble img.chat-upload {
     max-width: 220px; height: auto; border-radius: 12px;
@@ -830,18 +838,13 @@ function appendMsg(msg) {
 
     if (isMedia) bubble.classList.add('media-bubble');
 
-    if (msg.created_at && !isMedia) {
+    if (msg.created_at) {
         var ts = document.createElement('span');
         ts.className = 'pm-bubble-ts';
         ts.textContent = formatTime(msg.created_at);
         bubble.appendChild(ts);
     }
     row.appendChild(bubble);
-    if (isMedia && msg.created_at) {
-        var td = document.createElement('div');
-        td.className = 'msg-time'; td.textContent = formatTime(msg.created_at);
-        row.appendChild(td);
-    }
     body.appendChild(row);
 }
 

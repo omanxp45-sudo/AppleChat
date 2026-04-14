@@ -363,10 +363,18 @@ html, body {
     background: transparent !important;
     box-shadow: none !important;
     padding: 0 !important;
+    position: relative;
 }
 .bubble.bubble-media::before,
 .bubble.bubble-media::after { display: none; }
-.bubble.bubble-media .bubble-ts { display: none; }
+/* Timestamp overlaid on media with dark pill */
+.bubble.bubble-media .bubble-ts {
+    background: rgba(0,0,0,0.42);
+    color: #fff !important;
+    border-radius: 10px;
+    padding: 1px 6px;
+    z-index: 2;
+}
 
 .bubble .chat-upload {
     max-width: 220px;
@@ -2804,15 +2812,12 @@ function appendMessage(msg) {
     }
 
     var ts = msg.created_at ? formatTime(msg.created_at) : '';
-    if (!isMedia && ts) {
-        // Timestamp inside bubble
+    // Always place timestamp inside the bubble (bottom-right)
+    if (ts) {
         $bubble.append('<span class="bubble-ts">' + ts + '</span>');
     }
 
     $wrap.append($bubble);
-    if (isMedia && ts) {
-        $wrap.append('<div class="msg-time">' + ts + '</div>');
-    }
 
     // ── Link preview for text messages containing a URL ──
     if (msg.message && /https?:\/\//.test(msg.message)) {
