@@ -99,7 +99,7 @@ html, body {
 .pm-row.other { align-self: flex-start; }
 
 .pm-bubble {
-    position: relative; padding: 8px 12px 20px;
+    position: relative; padding: 8px 12px 8px;
     border-radius: 16px; font-size: 16px; line-height: 1.45;
     max-width: 100%; word-break: break-word;
 }
@@ -136,15 +136,18 @@ html, body {
 .pm-bubble.media-bubble::before,
 .pm-bubble.media-bubble::after { display: none; }
 .pm-bubble-ts {
-    position: absolute; bottom: 4px; right: 8px;
+    display: block; text-align: right; margin-top: 4px;
     font-size: 10px; color: #999; white-space: nowrap; pointer-events: none;
 }
-.pm-bubble.media-bubble .pm-bubble-ts {
+/* Visual media (image-only, video, sticker): overlay timestamp with dark pill */
+.pm-bubble.visual-media .pm-bubble-ts {
+    position: absolute; bottom: 6px; right: 8px;
     background: rgba(0,0,0,0.42);
     color: #fff !important;
     border-radius: 10px;
     padding: 1px 6px;
     z-index: 2;
+    margin-top: 0;
 }
 .pm-bubble img.chat-upload {
     max-width: 220px; height: auto; border-radius: 12px;
@@ -718,11 +721,12 @@ function appendMsg(msg) {
     var bubble = document.createElement('div');
     bubble.className = 'pm-bubble';
     var isMedia = false;
+    var isVisualMedia = false;
 
     if (msg.sticker_url) {
         var si = document.createElement('img');
         si.className = 'chat-sticker'; si.src = msg.sticker_url;
-        bubble.appendChild(si); isMedia = true;
+        bubble.appendChild(si); isMedia = true; isVisualMedia = true;
     } else if (msg.audio_data) {
         var au = document.createElement('audio');
         au.controls = true; au.src = msg.audio_data;
@@ -736,7 +740,7 @@ function appendMsg(msg) {
         vid.controls = true; vid.src = msg.video_data;
         vid.style.maxWidth = '220px';
         vid.style.borderRadius = '12px';
-        bubble.appendChild(vid); isMedia = true;
+        bubble.appendChild(vid); isMedia = true; isVisualMedia = true;
     } else if (msg.poll_question) {
         var title = document.createElement('div');
         title.style.fontWeight = '700';
@@ -832,11 +836,12 @@ function appendMsg(msg) {
             im.className = 'chat-upload'; im.src = msg.image_data;
             im.onclick = function () { openLightbox(msg.image_data); };
             bubble.appendChild(im);
-            if (!msg.message) isMedia = true;
+            if (!msg.message) { isMedia = true; isVisualMedia = true; }
         }
     }
 
     if (isMedia) bubble.classList.add('media-bubble');
+    if (isVisualMedia) bubble.classList.add('visual-media');
 
     if (msg.created_at) {
         var ts = document.createElement('span');
