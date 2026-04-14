@@ -2280,6 +2280,82 @@ window.onload = function () {
     cc.addEventListener('touchmove',  cropDragMove,  { passive: true });
     cc.addEventListener('touchend',   cropDragEnd);
 
+    var stickerUrls = [
+        'https://i.imgur.com/6sqrgNK.png',
+        'https://i.imgur.com/Dt3VM26.png',
+        'https://i.imgur.com/yBUGgCQ.png',
+        'https://i.imgur.com/XNXYKlC.png',
+        'https://i.imgur.com/IZh9H8B.png',
+        'https://i.imgur.com/bYTUGeR.png',
+        'https://i.imgur.com/jm3nvjK.png',
+        'https://i.imgur.com/lInxmxK.png',
+        'https://i.imgur.com/dIc7Abs.png',
+        'https://i.imgur.com/mx6Tu33.png',
+        'https://i.imgur.com/47pnPHD.png',
+        'https://i.imgur.com/HbOdZSE.png',
+        'https://i.imgur.com/TFO84n2.png',
+        'https://i.imgur.com/rOtcLJf.png',
+        'https://i.imgur.com/yuLJrdH.png',
+        'https://i.imgur.com/AqWbP2a.png',
+        'https://i.imgur.com/NfxkEP9.png',
+        'https://i.imgur.com/NBnjmS3.png',
+        'https://i.imgur.com/sgIn7Hp.png',
+        'https://i.imgur.com/PZlYsh3.png',
+        'https://i.imgur.com/p4oJzJP.png',
+        'https://i.imgur.com/lFJfHhy.png',
+        'https://i.imgur.com/mCjBjMP.png',
+        'https://i.imgur.com/ZLVruHF.png',
+        'https://i.imgur.com/5IqJpdY.png',
+        'https://i.imgur.com/wkjgd5T.png',
+        'https://i.imgur.com/qbeRdCr.png',
+        'https://i.imgur.com/aFCkpNZ.png',
+        'https://i.imgur.com/RV84irI.png',
+        'https://i.imgur.com/OWGw5bW.png',
+        'https://i.imgur.com/XFGjDSL.png',
+        'https://i.imgur.com/G2lMKBM.png',
+        'https://i.imgur.com/bxtFpmf.png',
+        'https://i.imgur.com/zX9o3nM.png',
+        'https://i.imgur.com/kFp9RpM.png',
+        'https://i.imgur.com/IjZSn44.png',
+        'https://i.imgur.com/YlsSaRf.png',
+        'https://i.imgur.com/0Z8aJ75.png',
+        'https://i.imgur.com/LFCpFRE.png',
+        'https://i.imgur.com/YP5l3HU.png',
+        'https://i.imgur.com/x0IuLGF.png',
+        'https://i.imgur.com/L5xzDeI.png',
+        'https://i.imgur.com/s5C1kbM.png',
+        'https://i.imgur.com/a5ESBw1.png',
+        'https://i.imgur.com/JJai8XD.png',
+        'https://i.imgur.com/QsVsAUB.png',
+        'https://i.imgur.com/zLXQ7Ua.png',
+        'https://i.imgur.com/u82MtgI.png',
+        'https://i.imgur.com/5DJF0bU.png',
+        'https://i.imgur.com/Go9vKSd.png',
+        'https://i.imgur.com/JGIGROu.png',
+        'https://i.imgur.com/7ECo6jN.png',
+        'https://i.imgur.com/VO3hRHO.png',
+        'https://i.imgur.com/KRQnNEz.png',
+        'https://i.imgur.com/r0nip4X.png',
+        'https://i.imgur.com/F6Tsqe7.png',
+        'https://i.imgur.com/2BER987.png',
+        'https://i.imgur.com/PbILBZG.png',
+        'https://i.imgur.com/EjKXPIT.png',
+        'https://i.imgur.com/kBV0NOD.png',
+        'https://i.imgur.com/SSXnDqx.png',
+        'https://i.imgur.com/Xg5F0ai.png',
+        'https://i.imgur.com/nXqhhrg.png',
+        'https://i.imgur.com/sNXQxOq.png'
+    ];
+
+    function populateStickerMenu() {
+        var menu = document.getElementById('stickerMenu');
+        if (!menu) return;
+        menu.innerHTML = stickerUrls.map(function (url) {
+            return '<a class="dropdown-item sticker" href="#"><img src="' + url + '" alt="Sticker"></a>';
+        }).join('');
+    }
+    populateStickerMenu();
+
     // Sticker toggle
     document.getElementById('stickerToggle').addEventListener('click', function (e) {
         e.stopPropagation();
