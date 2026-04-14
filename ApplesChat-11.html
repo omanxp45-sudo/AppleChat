@@ -3093,73 +3093,15 @@ function openPM(username, avatar, status) {
     var me = localStorage.getItem('myUserName') || '';
     if (!username || username === me) return;
 
-    _pmPeer = username;
-    _pmChatId = _pmChatKey(me, username);
-    _pmLoadedIds = new Set();
-
-    // Update header
-    document.getElementById('pmHeaderName').textContent = username;
-    document.getElementById('pmHeaderAvatar').src = avatar || 'https://imgur.com/PVBYWRJ.png';
-    var isOnline = _onlineSet && _onlineSet.has(username);
-    var dot = document.getElementById('pmStatusDot');
-    var statusTxt = document.getElementById('pmStatusText');
-    dot.className = 'pm-header-status-dot' + (isOnline ? '' : ' offline');
-    statusTxt.textContent = isOnline ? (status || 'Online') : 'Offline';
-
-    // Clear messages
-    var body = document.getElementById('pmBody');
-    body.innerHTML = '<div class="pm-empty" id="pmEmpty">Loading…</div>';
-
-    // Clear unread for this peer
+    // Clear unread badge
     delete _pmUnread[username];
     _refreshUnreadBadges();
 
-    // Show panel
-    document.getElementById('pmOverlay').classList.add('show');
-    document.body.style.overflow = 'hidden';
-
-    // Detach previous listener
-    if (_pmListener) {
-        try { firebase.database().ref('private_messages/' + _pmListener).off(); } catch(e){}
-        _pmListener = null;
-    }
-
-    // Load + listen
-    try {
-        var ref = firebase.database().ref('private_messages/' + _pmChatId)
-                    .orderByChild('created_at').limitToLast(80);
-
-        ref.once('value', function(snapshot) {
-            var body2 = document.getElementById('pmBody');
-            body2.innerHTML = '';
-            var rows = [];
-            snapshot.forEach(function(child) { rows.push({ key: child.key, val: child.val() }); });
-            if (rows.length === 0) {
-                body2.innerHTML = '<div class="pm-empty">No messages yet.<br>Say hi! 👋</div>';
-            } else {
-                rows.forEach(function(r) {
-                    _pmLoadedIds.add(r.key);
-                    _appendPMMessage(r.val);
-                });
-                _pmScrollBottom();
-            }
-        });
-
-        // Listen for new messages
-        ref.on('child_added', function(snapshot) {
-            if (_pmLoadedIds.has(snapshot.key)) return;
-            _pmLoadedIds.add(snapshot.key);
-            // Remove empty placeholder
-            var empty = document.getElementById('pmEmpty');
-            if (empty) empty.remove();
-            _appendPMMessage(snapshot.val());
-            _pmScrollBottom();
-        });
-
-        _pmListener = _pmChatId;
-    } catch(e) { console.warn('PM error:', e); }
-
-    document.getElementById('pmInput').focus();
+    // Open in new window
+    var url = 'pm.html?peer=' + encodeURIComponent(username)
+            + '&avatar=' + encodeURIComponent(avatar || '')
+            + '&status=' + encodeURIComponent(status || 'Online');
+    window.open(url, 'pm_' + username, 'width=420,height=700,resizable=yes');
 }
 
 function closePM() {
