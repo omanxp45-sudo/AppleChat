@@ -1366,6 +1366,205 @@ html.dark-mode, body.dark-mode {
 }
 .notif-banner.show { display: block; }
 @keyframes slideDown { from { transform: translateX(-50%) translateY(-20px); opacity:0; } to { transform: translateX(-50%) translateY(0); opacity:1; } }
+
+/* ── Private Chat ─────────────────────────────────────────────────────────── */
+.pm-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 8300;
+    flex-direction: column;
+    background: linear-gradient(135deg,#c9d6ff 0%,#e2e2e2 50%,#fbc2eb 100%);
+    animation: slideInRight 0.22s ease;
+}
+.pm-overlay.show { display: flex; }
+@keyframes slideInRight { from { transform: translateX(100%); } to { transform: none; } }
+
+.dark-mode .pm-overlay {
+    background: linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+}
+
+/* PM header */
+.pm-header {
+    background: linear-gradient(135deg,#b03025,#e74c3c);
+    color: #fff;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    z-index: 20; min-height: 58px;
+    padding-top: max(10px, env(safe-area-inset-top));
+}
+.pm-back-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #fff; font-size: 18px; flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.12s;
+}
+.pm-back-btn:active { background: rgba(255,255,255,0.38); }
+.pm-header-avatar {
+    width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.5); flex-shrink: 0;
+}
+.pm-header-info { flex: 1; min-width: 0; }
+.pm-header-name {
+    font-size: 16px; font-weight: 700; line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pm-header-status {
+    font-size: 11px; color: rgba(255,255,255,0.75); line-height: 1;
+    display: flex; align-items: center; gap: 4px;
+}
+.pm-header-status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #2ecc71; display: inline-block;
+    box-shadow: 0 0 0 2px rgba(46,204,113,0.3);
+}
+.pm-header-status-dot.offline { background: #aaa; box-shadow: none; }
+
+/* PM body */
+.pm-body {
+    flex: 1; overflow-y: auto; padding: 10px 10px 4px;
+    display: flex; flex-direction: column; gap: 3px;
+    -webkit-overflow-scrolling: touch;
+}
+.pm-body::-webkit-scrollbar { width: 3px; }
+.pm-body::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+/* PM bubbles — reuse main bubble styles */
+.pm-msg-row {
+    display: flex; align-items: flex-end; gap: 6px;
+    max-width: 82%; animation: fadeIn 0.18s ease;
+}
+.pm-msg-row.me    { align-self: flex-end;   flex-direction: row-reverse; }
+.pm-msg-row.other { align-self: flex-start; }
+.pm-bubble {
+    position: relative; padding: 8px 12px 20px;
+    border-radius: 16px; font-size: 16px; line-height: 1.45;
+    max-width: 100%; word-break: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.pm-msg-row.other .pm-bubble {
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.65);
+    color: #111; border-bottom-left-radius: 3px;
+}
+.pm-msg-row.other .pm-bubble::before {
+    content: ''; position: absolute; bottom: 0; left: -7px;
+    border-top: 8px solid transparent;
+    border-right: 8px solid rgba(255,255,255,0.5);
+}
+.pm-msg-row.me .pm-bubble {
+    background: rgba(180,240,190,0.5);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(180,240,190,0.75);
+    color: #0d2b14; border-bottom-right-radius: 3px;
+    box-shadow: 0 4px 18px rgba(37,211,102,0.15), inset 0 1px 0 rgba(255,255,255,0.55);
+}
+.pm-msg-row.me .pm-bubble::after {
+    content: ''; position: absolute; bottom: 0; right: -7px;
+    border-top: 8px solid transparent;
+    border-left: 8px solid rgba(180,240,190,0.5);
+}
+.dark-mode .pm-msg-row.other .pm-bubble {
+    background: rgba(38,38,55,0.72); border-color: rgba(255,255,255,0.1); color: #e2e2e2;
+}
+.dark-mode .pm-msg-row.other .pm-bubble::before { border-right-color: rgba(38,38,55,0.72); }
+.dark-mode .pm-msg-row.me .pm-bubble {
+    background: rgba(18,72,45,0.68); border-color: rgba(70,190,110,0.32); color: #c8efd4;
+}
+.dark-mode .pm-msg-row.me .pm-bubble::after { border-left-color: rgba(18,72,45,0.68); }
+.pm-bubble-ts {
+    position: absolute; bottom: 4px; right: 8px;
+    font-size: 10px; color: #999; white-space: nowrap; pointer-events: none;
+}
+.dark-mode .pm-bubble-ts { color: rgba(255,255,255,0.4); }
+.pm-empty {
+    text-align: center; color: rgba(0,0,0,0.3); font-size: 13px;
+    margin: auto; padding: 20px;
+}
+.dark-mode .pm-empty { color: rgba(255,255,255,0.3); }
+
+/* PM input bar */
+.pm-input-bar {
+    background: rgba(240,240,240,0.5);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.5);
+    padding: 8px 10px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.dark-mode .pm-input-bar {
+    background: rgba(12,12,22,0.68);
+    border-top-color: rgba(255,255,255,0.08);
+}
+#pmInput {
+    flex: 1; border: none; border-radius: 22px; padding: 10px 16px;
+    font-size: 16px; outline: none; resize: none; max-height: 120px;
+    line-height: 1.4; touch-action: manipulation;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.6);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+    color: #111;
+    transition: box-shadow 0.2s;
+}
+#pmInput:focus {
+    background: rgba(255,255,255,0.68);
+    border-color: rgba(231,76,60,0.4);
+    box-shadow: 0 2px 12px rgba(231,76,60,0.18), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+.dark-mode #pmInput {
+    background: rgba(28,28,45,0.75); border-color: rgba(255,255,255,0.12); color: #e2e2e2;
+}
+.dark-mode #pmInput::placeholder { color: rgba(255,255,255,0.3); }
+.pm-send-btn {
+    width: 46px; height: 46px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg,#3355ff 0%,#0022ff 100%);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    box-shadow: 0 0 16px rgba(0,34,255,0.65), 0 3px 10px rgba(0,34,255,0.4), inset 0 1px 0 rgba(160,180,255,0.5);
+    transition: transform 0.1s, box-shadow 0.12s;
+}
+.pm-send-btn:active { transform: scale(0.93); box-shadow: 0 0 8px rgba(0,34,255,0.5); }
+
+/* DM button on online user card */
+.online-dm-btn {
+    font-size: 11px; cursor: pointer;
+    background: rgba(13,110,253,0.88);
+    border: none; border-radius: 50%;
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    position: absolute; bottom: -1px; right: -1px; z-index: 2;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 1px 5px rgba(13,110,253,0.45);
+    transition: background 0.12s, transform 0.1s;
+}
+.online-dm-btn:active { background: #0a58ca; transform: scale(0.9); }
+
+/* DM button in chat message badge */
+.dm-btn {
+    border: none; background: none; cursor: pointer; font-size: 13px;
+    opacity: 0.55; line-height: 1; padding: 2px 4px; border-radius: 6px;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.12s, background 0.12s;
+    flex-shrink: 0;
+}
+.dm-btn:active { opacity: 1; background: rgba(13,110,253,0.12); }
+
+/* Unread badge on DM button */
+.pm-unread-badge {
+    position: absolute; top: -4px; left: -4px;
+    background: #ff1f3a; color: #fff;
+    font-size: 9px; font-weight: 800; border-radius: 50%;
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 4px rgba(255,31,58,0.5);
+    pointer-events: none;
+}
 </style>
 </head>
 <body>
@@ -1630,6 +1829,30 @@ html.dark-mode, body.dark-mode {
     </div>
 </div>
 
+<!-- Private Chat overlay -->
+<div class="pm-overlay" id="pmOverlay">
+    <div class="pm-header">
+        <button class="pm-back-btn" onclick="closePM()" title="Back">&#8592;</button>
+        <img class="pm-header-avatar" id="pmHeaderAvatar" src="https://imgur.com/PVBYWRJ.png" alt="">
+        <div class="pm-header-info">
+            <div class="pm-header-name" id="pmHeaderName">User</div>
+            <div class="pm-header-status">
+                <span class="pm-header-status-dot" id="pmStatusDot"></span>
+                <span id="pmStatusText">Online</span>
+            </div>
+        </div>
+    </div>
+    <div class="pm-body" id="pmBody">
+        <div class="pm-empty" id="pmEmpty">No messages yet.<br>Say hi! 👋</div>
+    </div>
+    <div class="pm-input-bar">
+        <textarea id="pmInput" placeholder="Message…" rows="1"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendPM();}"></textarea>
+        <button class="pm-send-btn" onclick="sendPM()" title="Send">&#9658;</button>
+    </div>
+</div>
+
 <!-- Notification banner -->
 <div class="notif-banner" id="notifBanner" onclick="document.getElementById('notifBanner').classList.remove('show')"></div>
 
@@ -1784,8 +2007,11 @@ window.onload = function () {
     heartbeat();
     setInterval(heartbeat, 30000);
     listenOnlineUsers();
-    // Listen for incoming calls after Firebase is ready
-    setTimeout(_listenForIncomingCalls, 1200);
+    // Listen for incoming calls + PMs after Firebase is ready
+    setTimeout(function() {
+        _listenForIncomingCalls();
+        _listenIncomingPMs();
+    }, 1200);
 };
 
 function updateSendMic() {
@@ -1894,6 +2120,10 @@ function appendMessage(msg) {
         $replyBtn.attr('onclick', '_doReply("' + rid + '"); event.stopPropagation();');
         $replyBtn.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="16" height="16" fill="rgba(220,53,69,0.8)"><path d="M7.5 4L2 9l5.5 5V11c4.5 0 7.5 1.5 9 5-0.5-5-3.5-9-9-9V4z"/></svg>');
         $nameRow.append($replyBtn);
+        // DM button
+        var $dmBtn = $('<button class="dm-btn" title="Private message">💬</button>');
+        $dmBtn.attr('onclick', 'openPM("' + msg.username.replace(/"/g,'') + '","' + (msg.avatar||'').replace(/"/g,'') + '","' + (msg.status||'Online').replace(/"/g,'') + '"); event.stopPropagation();');
+        $nameRow.append($dmBtn);
         // Block button
         var $blockBtn = $('<button class="block-btn" title="Block user">🚫</button>');
         $blockBtn.attr('onclick', '_blockFromMsg("' + msg.username.replace(/"/g,'') + '"); event.stopPropagation();');
@@ -2132,14 +2362,32 @@ function listenOnlineUsers() {
 
                 imgWrap.appendChild(img);
                 imgWrap.appendChild(dot);
-                // Call button (only for others)
+                // Call + DM buttons (only for others)
                 if (user.username !== me) {
+                    var safeUname = user.username.replace(/"/g,'');
+                    // Call button (top-right)
                     var callBtn = document.createElement('button');
                     callBtn.className = 'online-call-btn';
                     callBtn.title = 'Call ' + user.username;
                     callBtn.textContent = '📞';
-                    callBtn.setAttribute('onclick', 'initiateCall("' + user.username.replace(/"/g,'') + '"); event.stopPropagation();');
+                    callBtn.setAttribute('onclick', 'initiateCall("' + safeUname + '"); event.stopPropagation();');
                     imgWrap.appendChild(callBtn);
+                    // DM button (bottom-right)
+                    var dmBtn = document.createElement('button');
+                    dmBtn.className = 'online-dm-btn';
+                    dmBtn.title = 'Message ' + user.username;
+                    dmBtn.textContent = '💬';
+                    dmBtn.setAttribute('onclick', 'openPM("' + safeUname + '","' + (user.avatar||'').replace(/"/g,'') + '","' + (user.status||'Online').replace(/"/g,'') + '"); event.stopPropagation();');
+                    // Unread badge
+                    var unread = _pmUnread[safeUname] || 0;
+                    if (unread > 0) {
+                        var badge = document.createElement('span');
+                        badge.className = 'pm-unread-badge';
+                        badge.textContent = unread > 9 ? '9+' : unread;
+                        dmBtn.style.position = 'relative';
+                        dmBtn.appendChild(badge);
+                    }
+                    imgWrap.appendChild(dmBtn);
                 }
                 wrap.appendChild(imgWrap);
                 wrap.appendChild(name);
@@ -2721,7 +2969,7 @@ function _startCallTimer() {
 
 // Patch ESC key to also close overlays
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { closeSettings(); closeBlockedList(); endCall(); }
+    if (e.key === 'Escape') { closePM(); closeSettings(); closeBlockedList(); endCall(); }
 });
 
 function stopGoLive() {
@@ -2733,6 +2981,202 @@ function stopGoLive() {
     try {
         firebase.database().ref('users/' + username).update({ isLive: false, liveFrame: null });
     } catch(e) {}
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ── Private Chat (DM) ────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+var _pmPeer = null;           // username of the other person
+var _pmChatId = null;         // Firebase chat node key
+var _pmListener = null;       // Firebase off() reference
+var _pmUnread = {};           // { username: count }
+var _pmLoadedIds = new Set(); // prevent duplicate messages on re-open
+
+// Build consistent chat ID from two usernames (alphabetical sort)
+function _pmChatKey(a, b) {
+    return [a, b].sort().join('__pm__');
+}
+
+function openPM(username, avatar, status) {
+    var me = localStorage.getItem('myUserName') || '';
+    if (!username || username === me) return;
+
+    _pmPeer = username;
+    _pmChatId = _pmChatKey(me, username);
+    _pmLoadedIds = new Set();
+
+    // Update header
+    document.getElementById('pmHeaderName').textContent = username;
+    document.getElementById('pmHeaderAvatar').src = avatar || 'https://imgur.com/PVBYWRJ.png';
+    var isOnline = _onlineSet && _onlineSet.has(username);
+    var dot = document.getElementById('pmStatusDot');
+    var statusTxt = document.getElementById('pmStatusText');
+    dot.className = 'pm-header-status-dot' + (isOnline ? '' : ' offline');
+    statusTxt.textContent = isOnline ? (status || 'Online') : 'Offline';
+
+    // Clear messages
+    var body = document.getElementById('pmBody');
+    body.innerHTML = '<div class="pm-empty" id="pmEmpty">Loading…</div>';
+
+    // Clear unread for this peer
+    delete _pmUnread[username];
+    _refreshUnreadBadges();
+
+    // Show panel
+    document.getElementById('pmOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+
+    // Detach previous listener
+    if (_pmListener) {
+        try { firebase.database().ref('private_messages/' + _pmListener).off(); } catch(e){}
+        _pmListener = null;
+    }
+
+    // Load + listen
+    try {
+        var ref = firebase.database().ref('private_messages/' + _pmChatId)
+                    .orderByChild('created_at').limitToLast(80);
+
+        ref.once('value', function(snapshot) {
+            var body2 = document.getElementById('pmBody');
+            body2.innerHTML = '';
+            var rows = [];
+            snapshot.forEach(function(child) { rows.push({ key: child.key, val: child.val() }); });
+            if (rows.length === 0) {
+                body2.innerHTML = '<div class="pm-empty">No messages yet.<br>Say hi! 👋</div>';
+            } else {
+                rows.forEach(function(r) {
+                    _pmLoadedIds.add(r.key);
+                    _appendPMMessage(r.val);
+                });
+                _pmScrollBottom();
+            }
+        });
+
+        // Listen for new messages
+        ref.on('child_added', function(snapshot) {
+            if (_pmLoadedIds.has(snapshot.key)) return;
+            _pmLoadedIds.add(snapshot.key);
+            // Remove empty placeholder
+            var empty = document.getElementById('pmEmpty');
+            if (empty) empty.remove();
+            _appendPMMessage(snapshot.val());
+            _pmScrollBottom();
+        });
+
+        _pmListener = _pmChatId;
+    } catch(e) { console.warn('PM error:', e); }
+
+    document.getElementById('pmInput').focus();
+}
+
+function closePM() {
+    document.getElementById('pmOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+    if (_pmListener) {
+        try { firebase.database().ref('private_messages/' + _pmListener).off(); } catch(e){}
+        _pmListener = null;
+    }
+    _pmPeer = null;
+    _pmChatId = null;
+}
+
+function sendPM() {
+    var input = document.getElementById('pmInput');
+    var text = input.value.trim();
+    if (!text || !_pmChatId) return;
+    var me = localStorage.getItem('myUserName') || '';
+    var myAvatar = localStorage.getItem('avatarImgData') || 'https://imgur.com/PVBYWRJ.png';
+    var myStatus = localStorage.getItem('status') || '';
+    input.value = '';
+    input.style.height = 'auto';
+    try {
+        firebase.database().ref('private_messages/' + _pmChatId).push({
+            from: me,
+            to: _pmPeer,
+            message: text,
+            avatar: myAvatar,
+            status: myStatus,
+            created_at: firebase.database.ServerValue.TIMESTAMP
+        });
+    } catch(e) { console.warn('PM send error:', e); }
+}
+
+function _appendPMMessage(msg) {
+    var me = localStorage.getItem('myUserName') || '';
+    var isMe = msg.from === me;
+    var body = document.getElementById('pmBody');
+    var row = document.createElement('div');
+    row.className = 'pm-msg-row ' + (isMe ? 'me' : 'other');
+    var bubble = document.createElement('div');
+    bubble.className = 'pm-bubble';
+    // Text
+    var textSpan = document.createElement('span');
+    textSpan.innerHTML = embedUrls(msg.message || '');
+    bubble.appendChild(textSpan);
+    // Timestamp
+    if (msg.created_at) {
+        var ts = document.createElement('span');
+        ts.className = 'pm-bubble-ts';
+        ts.textContent = formatTime(msg.created_at);
+        bubble.appendChild(ts);
+    }
+    row.appendChild(bubble);
+    body.appendChild(row);
+}
+
+function _pmScrollBottom() {
+    var body = document.getElementById('pmBody');
+    body.scrollTop = body.scrollHeight;
+}
+
+// Listen for incoming PMs in the background (from all known chats)
+function _listenIncomingPMs() {
+    var me = localStorage.getItem('myUserName') || '';
+    if (!me) return;
+    try {
+        // Listen on all private_messages nodes that involve me
+        firebase.database().ref('private_messages').on('child_added', function(chatSnap) {
+            var chatId = chatSnap.key;
+            if (!chatId.includes(me)) return; // not my chat
+            // Listen for new messages in this chat
+            firebase.database().ref('private_messages/' + chatId)
+                .orderByChild('created_at').limitToLast(1)
+                .on('child_added', function(msgSnap) {
+                    var msg = msgSnap.val();
+                    if (!msg || msg.from === me) return;          // ignore own messages
+                    if (_pmPeer === msg.from) return;             // already viewing this chat
+                    // Increment unread
+                    _pmUnread[msg.from] = (_pmUnread[msg.from] || 0) + 1;
+                    _refreshUnreadBadges();
+                    // Show notification
+                    _showNotification(msg.from, '💬 ' + (msg.message || '…'), msg.avatar);
+                });
+        });
+    } catch(e) {}
+}
+
+function _refreshUnreadBadges() {
+    // Update DM badges on online user cards
+    document.querySelectorAll('.online-dm-btn').forEach(function(btn) {
+        var uname = (btn.getAttribute('onclick') || '').match(/openPM\("([^"]+)"/);
+        if (!uname) return;
+        uname = uname[1];
+        var existing = btn.querySelector('.pm-unread-badge');
+        var count = _pmUnread[uname] || 0;
+        if (count > 0) {
+            if (!existing) {
+                var badge = document.createElement('span');
+                badge.className = 'pm-unread-badge';
+                btn.style.position = 'relative';
+                btn.appendChild(badge);
+                existing = badge;
+            }
+            existing.textContent = count > 9 ? '9+' : count;
+        } else if (existing) {
+            existing.remove();
+        }
+    });
 }
 
 </script>
