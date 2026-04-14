@@ -512,7 +512,7 @@ html, body {
     height: 46px;
     border-radius: 50%;
     border: none;
-    background: #e74c3c;
+    background: #0d6efd;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -525,7 +525,7 @@ html, body {
 }
 .mic-btn:active { transform: scale(0.93); }
 .mic-btn.recording {
-    background: #c0392b !important;
+    background: #0a58ca !important;
     animation: pulse 1s infinite;
 }
 @keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.1); } }
@@ -913,15 +913,16 @@ html, body { background: linear-gradient(135deg, #c9d6ff 0%, #e2e2e2 50%, #fbc2e
 }
 .plus-btn:active { background: rgba(255,255,255,0.6); }
 
-/* ── Mic button — red glass ── */
+/* ── Mic button — Bootstrap blue glass ── */
 .mic-btn {
-    background: rgba(231,76,60,0.72);
+    background: rgba(13,110,253,0.72);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,120,110,0.5);
-    box-shadow: 0 4px 14px rgba(231,76,60,0.35), inset 0 1px 0 rgba(255,200,190,0.4);
+    border: 1px solid rgba(100,160,255,0.5);
+    box-shadow: 0 4px 14px rgba(13,110,253,0.35), inset 0 1px 0 rgba(180,210,255,0.4);
 }
-.mic-btn:active { background: rgba(192,57,43,0.85); }
+.mic-btn:active { background: rgba(10,88,202,0.85); }
+.mic-btn.recording { background: rgba(10,88,202,1) !important; }
 
 /* ── Send button — green glass ── */
 .send-btn {
@@ -1008,6 +1009,359 @@ html, body { background: linear-gradient(135deg, #c9d6ff 0%, #e2e2e2 50%, #fbc2e
     border: 1.5px solid rgba(220,53,69,0.3);
     box-shadow: 0 2px 8px rgba(220,53,69,0.10);
 }
+
+/* ── Dark mode ───────────────────────────────────────────────────────────── */
+html.dark-mode, body.dark-mode {
+    background: linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%) fixed !important;
+}
+.dark-mode .chat-shell { background: rgba(15,15,25,0.65) !important; }
+.dark-mode .msg-row.other .bubble {
+    background: rgba(38,38,55,0.72) !important;
+    border-color: rgba(255,255,255,0.10) !important;
+    color: #e2e2e2 !important;
+}
+.dark-mode .msg-row.other .bubble::before { border-right-color: rgba(38,38,55,0.72) !important; }
+.dark-mode .msg-row.me .bubble {
+    background: rgba(18,72,45,0.68) !important;
+    border-color: rgba(70,190,110,0.32) !important;
+    color: #c8efd4 !important;
+}
+.dark-mode .msg-row.me .bubble::after { border-left-color: rgba(18,72,45,0.68) !important; }
+.dark-mode .msg-row.me .bubble a { color: #6ee89a; }
+.dark-mode .bubble-ts { color: rgba(255,255,255,0.4); }
+.dark-mode .chat-input-bar {
+    background: rgba(12,12,22,0.68) !important;
+    border-top-color: rgba(255,255,255,0.08) !important;
+}
+.dark-mode #myInput {
+    background: rgba(28,28,45,0.75) !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #e2e2e2 !important;
+}
+.dark-mode #myInput::placeholder { color: rgba(255,255,255,0.3); }
+.dark-mode .plus-btn {
+    background: rgba(35,35,55,0.65) !important;
+    border-color: rgba(255,255,255,0.15) !important;
+    color: #ccc !important;
+}
+.dark-mode .online-bar {
+    background: rgba(12,12,22,0.65) !important;
+    border-bottom-color: rgba(255,255,255,0.08) !important;
+}
+.dark-mode .online-user-name { color: #bbb; }
+.dark-mode .online-bar-label { color: rgba(255,255,255,0.4); }
+.dark-mode .action-tray {
+    background: rgba(12,12,22,0.68) !important;
+    border-top-color: rgba(255,255,255,0.08) !important;
+}
+.dark-mode .tray-btn {
+    background: rgba(35,35,58,0.6) !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: #ccc !important;
+}
+.dark-mode .reply-bar {
+    background: rgba(22,22,38,0.78) !important;
+    border-top-color: rgba(255,255,255,0.08) !important;
+}
+.dark-mode .reply-bar-text { color: #aaa; }
+.dark-mode .reply-bar-name { color: #f48080; }
+.dark-mode .msg-username {
+    background: rgba(28,28,48,0.62) !important;
+    border-color: rgba(220,53,69,0.22) !important;
+}
+.dark-mode .badge-name-text { color: #f08080; }
+.dark-mode .badge-user-status { color: rgba(240,128,128,0.65); }
+.dark-mode .reply-quote { background: rgba(255,255,255,0.06) !important; }
+.dark-mode .reply-quote-text { color: #aaa; }
+.dark-mode .sticker-dropdown {
+    background: rgba(25,25,42,0.88) !important;
+    border-color: rgba(255,255,255,0.1) !important;
+}
+.dark-mode .status-bar {
+    background: rgba(25,25,42,0.8);
+    border-bottom-color: rgba(255,255,255,0.08);
+    color: #ccc;
+}
+
+/* ── Chat background variants ────────────────────────────────────────────── */
+.bg-nature   .chat-body-wrap { background: url('https://i.imgur.com/7LkfFtq.jpeg') center/cover no-repeat; }
+.bg-gradient1 .chat-body-wrap { background: linear-gradient(160deg,#a8edea,#fed6e3); }
+.bg-gradient2 .chat-body-wrap { background: linear-gradient(160deg,#d4fc79,#96e6a1); }
+.bg-gradient3 .chat-body-wrap { background: linear-gradient(160deg,#fbc2eb,#a6c1ee); }
+.bg-darkbg   .chat-body-wrap { background: #141424; }
+.bg-white    .chat-body-wrap { background: #f8f8f8; }
+
+/* ── Settings modal ──────────────────────────────────────────────────────── */
+.settings-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.52); z-index: 8000;
+    align-items: flex-end; justify-content: center;
+}
+.settings-modal.show { display: flex; }
+.settings-panel {
+    width: 100%; max-width: 600px;
+    background: rgba(255,255,255,0.76);
+    backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px);
+    border-top-left-radius: 24px; border-top-right-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.6);
+    padding: 20px 20px 36px;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.2);
+    animation: slideUp 0.22s ease;
+}
+.dark-mode .settings-panel {
+    background: rgba(18,18,32,0.9);
+    border-color: rgba(255,255,255,0.1);
+    color: #e2e2e2;
+}
+@keyframes slideUp { from { transform: translateY(60px); opacity: 0; } to { transform: none; opacity: 1; } }
+.settings-title {
+    font-size: 16px; font-weight: 700; margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.settings-close {
+    border: none; background: none; font-size: 26px; cursor: pointer;
+    color: #999; line-height: 1; padding: 0;
+}
+.settings-close:hover { color: #555; }
+.settings-section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: #888; margin-bottom: 10px;
+}
+.dark-mode .settings-section-label { color: #aaa; }
+.bg-grid {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 10px;
+    margin-bottom: 18px;
+}
+.bg-swatch {
+    height: 54px; border-radius: 14px; cursor: pointer;
+    border: 2.5px solid transparent;
+    transition: border-color 0.15s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+}
+.bg-swatch:active { transform: scale(0.93); }
+.bg-swatch.active { border-color: #0d6efd; box-shadow: 0 0 0 3px rgba(13,110,253,0.25); }
+.bg-swatch-default  { background: linear-gradient(135deg,#c9d6ff,#fbc2eb); }
+.bg-swatch-nature   { background: url('https://i.imgur.com/7LkfFtq.jpeg') center/cover; }
+.bg-swatch-grad1    { background: linear-gradient(160deg,#a8edea,#fed6e3); }
+.bg-swatch-grad2    { background: linear-gradient(160deg,#d4fc79,#96e6a1); }
+.bg-swatch-grad3    { background: linear-gradient(160deg,#fbc2eb,#a6c1ee); }
+.bg-swatch-darkbg   { background: #141424; color: #fff; font-size: 16px; }
+.bg-swatch-white    { background: #f5f5f5; }
+.settings-toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 0; border-top: 1px solid rgba(0,0,0,0.07);
+}
+.dark-mode .settings-toggle-row { border-top-color: rgba(255,255,255,0.08); }
+.settings-toggle-label { font-size: 14px; font-weight: 600; }
+.toggle-switch { position: relative; width: 48px; height: 26px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+    position: absolute; inset: 0; background: #ccc; border-radius: 26px;
+    cursor: pointer; transition: background 0.2s;
+}
+.toggle-slider::before {
+    content: ''; position: absolute;
+    width: 20px; height: 20px; left: 3px; bottom: 3px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch input:checked + .toggle-slider { background: #0d6efd; }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(22px); }
+.settings-view-btn {
+    padding: 6px 14px; border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.12); background: transparent;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 0.12s;
+}
+.dark-mode .settings-view-btn {
+    border-color: rgba(255,255,255,0.2); color: #e2e2e2;
+}
+.settings-view-btn:active { background: rgba(0,0,0,0.06); }
+
+/* ── Header settings button ─────────────────────────────────────────────── */
+.header-settings-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #fff; flex-shrink: 0; font-size: 16px;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    transition: background 0.12s;
+}
+.header-settings-btn:active { background: rgba(255,255,255,0.38); }
+
+/* ── Blocked users modal ─────────────────────────────────────────────────── */
+.blocked-modal {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 8200;
+    align-items: center; justify-content: center; padding: 20px;
+}
+.blocked-modal.show { display: flex; }
+.blocked-panel {
+    width: 100%; max-width: 360px; max-height: 68vh;
+    background: rgba(255,255,255,0.80);
+    backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px);
+    border-radius: 22px; border: 1px solid rgba(255,255,255,0.65);
+    padding: 18px 18px 22px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+    display: flex; flex-direction: column; gap: 12px;
+    animation: zoomIn 0.18s ease;
+}
+.dark-mode .blocked-panel {
+    background: rgba(18,18,32,0.9);
+    border-color: rgba(255,255,255,0.1);
+    color: #e2e2e2;
+}
+.blocked-panel-title {
+    font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.blocked-list-inner {
+    overflow-y: auto; flex: 1;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.blocked-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; border-radius: 12px;
+    background: rgba(255,255,255,0.48);
+    border: 1px solid rgba(0,0,0,0.06);
+}
+.dark-mode .blocked-item {
+    background: rgba(35,35,55,0.55);
+    border-color: rgba(255,255,255,0.09);
+}
+.blocked-item-name { font-size: 14px; font-weight: 600; }
+.unblock-btn {
+    padding: 4px 12px; border-radius: 16px; border: none;
+    background: #0d6efd; color: #fff; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: background 0.12s;
+    -webkit-tap-highlight-color: transparent;
+}
+.unblock-btn:active { background: #0a58ca; }
+.blocked-empty { font-size: 13px; color: #999; text-align: center; padding: 16px 0; }
+
+/* Block button on username badge */
+.block-btn {
+    border: none; background: none; cursor: pointer; font-size: 13px;
+    opacity: 0.5; line-height: 1; padding: 2px 4px; border-radius: 6px;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.12s, background 0.12s;
+    flex-shrink: 0;
+}
+.block-btn:active { opacity: 1; background: rgba(220,53,69,0.12); }
+
+/* ── Call feature ────────────────────────────────────────────────────────── */
+.online-call-btn {
+    font-size: 11px; cursor: pointer;
+    background: rgba(13,110,253,0.88);
+    border: none; border-radius: 50%;
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    position: absolute; top: -1px; right: -1px; z-index: 2;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 1px 5px rgba(13,110,253,0.45);
+    transition: background 0.12s, transform 0.1s;
+}
+.online-call-btn:active { background: #0a58ca; transform: scale(0.9); }
+
+.call-incoming-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65); z-index: 9500;
+    align-items: center; justify-content: center;
+}
+.call-incoming-overlay.show { display: flex; }
+.call-incoming-card {
+    background: rgba(255,255,255,0.84);
+    backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+    border-radius: 28px; border: 1px solid rgba(255,255,255,0.7);
+    padding: 28px 24px 22px;
+    text-align: center; width: 280px;
+    box-shadow: 0 12px 50px rgba(0,0,0,0.28);
+    animation: zoomIn 0.2s ease;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.call-incoming-avatar {
+    width: 78px; height: 78px; border-radius: 50%; object-fit: cover;
+    border: 3px solid rgba(13,110,253,0.45);
+    box-shadow: 0 0 0 7px rgba(13,110,253,0.12);
+    animation: pulse 1.4s infinite;
+}
+.call-incoming-name { font-size: 20px; font-weight: 700; }
+.call-incoming-label { font-size: 13px; color: #888; }
+.call-action-row { display: flex; gap: 28px; margin-top: 8px; }
+.call-action-btn {
+    width: 60px; height: 60px; border-radius: 50%; border: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s, opacity 0.12s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.call-action-btn:active { transform: scale(0.9); opacity: 0.85; }
+.call-action-btn.accept { background: #25d366; }
+.call-action-btn.reject { background: #e74c3c; }
+
+.call-active-overlay {
+    display: none; position: fixed; inset: 0; z-index: 9400;
+    flex-direction: column; align-items: center; justify-content: center;
+    background: linear-gradient(160deg,rgba(8,24,70,0.97),rgba(14,50,30,0.97));
+    backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+}
+.call-active-overlay.show { display: flex; }
+.call-remote-video {
+    width: 100%; max-width: 420px; max-height: 52vh;
+    object-fit: cover; border-radius: 20px;
+    background: #0a0a14; display: block;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+.call-self-video {
+    position: absolute; bottom: 130px; right: 18px;
+    width: 88px; height: 118px; border-radius: 14px;
+    object-fit: cover; background: #111;
+    border: 2px solid rgba(255,255,255,0.28);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+}
+.call-active-info { margin-top: 14px; color: #fff; text-align: center; }
+.call-active-name { font-size: 22px; font-weight: 700; }
+.call-active-timer { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+.call-active-controls {
+    position: absolute; bottom: 38px; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: center; gap: 18px;
+}
+.call-ctrl-btn {
+    width: 54px; height: 54px; border-radius: 50%; border: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; cursor: pointer; color: #fff;
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.22);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s, background 0.12s;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+}
+.call-ctrl-btn:active { transform: scale(0.9); }
+.call-ctrl-btn.muted { background: rgba(255,255,255,0.35); }
+.call-ctrl-btn.end-call { background: #e74c3c; border-color: rgba(255,100,100,0.4); }
+
+/* ── Notification banner ─────────────────────────────────────────────────── */
+.notif-banner {
+    display: none; position: fixed; top: 12px; left: 50%; z-index: 9000;
+    transform: translateX(-50%);
+    background: rgba(30,30,50,0.88);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px; padding: 10px 16px;
+    color: #fff; font-size: 13px; font-weight: 600;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    max-width: calc(100vw - 40px); white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; cursor: pointer;
+    animation: slideDown 0.2s ease;
+}
+.notif-banner.show { display: block; }
+@keyframes slideDown { from { transform: translateX(-50%) translateY(-20px); opacity:0; } to { transform: translateX(-50%) translateY(0); opacity:1; } }
 </style>
 </head>
 <body>
@@ -1023,6 +1377,7 @@ html, body { background: linear-gradient(135deg, #c9d6ff 0%, #e2e2e2 50%, #fbc2e
                 <span id="onlineCount">Connecting…</span>
             </span>
         </div>
+        <button class="header-settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
         <a class="header-user" href="index.html" title="Edit profile">
             <img class="header-avatar" id="avatar" src="https://imgur.com/PVBYWRJ.png" alt="Avatar">
             <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-start;">
@@ -1271,6 +1626,80 @@ html, body { background: linear-gradient(135deg, #c9d6ff 0%, #e2e2e2 50%, #fbc2e
     </div>
 </div>
 
+<!-- Notification banner -->
+<div class="notif-banner" id="notifBanner" onclick="document.getElementById('notifBanner').classList.remove('show')"></div>
+
+<!-- Settings modal -->
+<div class="settings-modal" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+    <div class="settings-panel">
+        <div class="settings-title">
+            <span>⚙️ Settings</span>
+            <button class="settings-close" onclick="closeSettings()">×</button>
+        </div>
+        <div class="settings-section-label">Chat Background</div>
+        <div class="bg-grid">
+            <div class="bg-swatch bg-swatch-default active" id="bg-btn-default"   onclick="setBg('default')"   title="Default">✦</div>
+            <div class="bg-swatch bg-swatch-nature"         id="bg-btn-nature"    onclick="setBg('nature')"    title="Nature"></div>
+            <div class="bg-swatch bg-swatch-grad1"          id="bg-btn-gradient1" onclick="setBg('gradient1')" title="Coral"></div>
+            <div class="bg-swatch bg-swatch-grad2"          id="bg-btn-gradient2" onclick="setBg('gradient2')" title="Mint"></div>
+            <div class="bg-swatch bg-swatch-grad3"          id="bg-btn-gradient3" onclick="setBg('gradient3')" title="Lavender"></div>
+            <div class="bg-swatch bg-swatch-darkbg"         id="bg-btn-darkbg"    onclick="setBg('darkbg')"    title="Dark">🌑</div>
+            <div class="bg-swatch bg-swatch-white"          id="bg-btn-white"     onclick="setBg('white')"     title="Clean">☁️</div>
+        </div>
+        <div class="settings-toggle-row">
+            <span class="settings-toggle-label">🌙 Dark Mode</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="settings-toggle-row">
+            <span class="settings-toggle-label">🚫 Blocked Users</span>
+            <button class="settings-view-btn" onclick="openBlockedList()">View List</button>
+        </div>
+    </div>
+</div>
+
+<!-- Blocked users modal -->
+<div class="blocked-modal" id="blockedModal" onclick="if(event.target===this)closeBlockedList()">
+    <div class="blocked-panel">
+        <div class="blocked-panel-title">
+            <span>🚫 Blocked Users</span>
+            <button class="settings-close" onclick="closeBlockedList()">×</button>
+        </div>
+        <div class="blocked-list-inner" id="blockedListInner"></div>
+    </div>
+</div>
+
+<!-- Incoming call overlay -->
+<div class="call-incoming-overlay" id="callIncomingOverlay">
+    <div class="call-incoming-card">
+        <img class="call-incoming-avatar" id="callIncomingAvatar" src="https://imgur.com/PVBYWRJ.png" alt="">
+        <div class="call-incoming-name" id="callIncomingName">User</div>
+        <div class="call-incoming-label" id="callIncomingLabel">📞 Incoming call…</div>
+        <div class="call-action-row">
+            <button class="call-action-btn reject" onclick="rejectCall()" title="Decline">📵</button>
+            <button class="call-action-btn accept" onclick="acceptCall()" title="Answer">📞</button>
+        </div>
+    </div>
+</div>
+
+<!-- Active call overlay -->
+<div class="call-active-overlay" id="callActiveOverlay">
+    <video class="call-remote-video" id="callRemoteVideo" autoplay playsinline></video>
+    <video class="call-self-video"   id="callSelfVideo"   autoplay muted playsinline></video>
+    <div class="call-active-info">
+        <div class="call-active-name"  id="callActiveName">Calling…</div>
+        <div class="call-active-timer" id="callActiveTimer">00:00</div>
+    </div>
+    <div class="call-active-controls">
+        <button class="call-ctrl-btn" id="callMuteBtn"    onclick="toggleCallMute()"  title="Mute">🎤</button>
+        <button class="call-ctrl-btn" id="callVideoBtn"   onclick="toggleCallVideo()" title="Camera">📹</button>
+        <button class="call-ctrl-btn end-call"            onclick="endCall()"         title="End">📵</button>
+        <button class="call-ctrl-btn" id="callSpeakerBtn" onclick="toggleSpeaker()"   title="Speaker">🔊</button>
+    </div>
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1351,6 +1780,8 @@ window.onload = function () {
     heartbeat();
     setInterval(heartbeat, 30000);
     listenOnlineUsers();
+    // Listen for incoming calls after Firebase is ready
+    setTimeout(_listenForIncomingCalls, 1200);
 };
 
 function updateSendMic() {
@@ -1385,8 +1816,14 @@ function connectFirebase() {
 
         ref.on('child_added', function (snapshot) {
             if (!initialLoadDone) return;
-            appendMessage(snapshot.val());
+            var msg = snapshot.val();
+            appendMessage(msg);
             scrollToBottom();
+            // Push notification for messages from others
+            var me = localStorage.getItem('myUserName') || '';
+            if (msg.username && msg.username !== me) {
+                _showNotification(msg.username, msg.message || (msg.image_data ? '📷 Image' : msg.sticker_url ? '😊 Sticker' : '🎤 Voice note'), msg.avatar);
+            }
         });
 
         setTimeout(function () { initialLoadDone = true; }, 500);
@@ -1418,6 +1855,7 @@ function formatTime(ts) {
 
 function appendMessage(msg) {
     var me      = localStorage.getItem('myUserName') || '';
+    if (msg.username && msg.username !== me && _isBlocked(msg.username)) return;
     var isMe    = msg.username === me;
     var $row    = $('<div>').addClass('msg-row').addClass(isMe ? 'me' : 'other');
     var $wrap   = $('<div class="bubble-wrap">');
@@ -1452,6 +1890,10 @@ function appendMessage(msg) {
         $replyBtn.attr('onclick', '_doReply("' + rid + '"); event.stopPropagation();');
         $replyBtn.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="16" height="16" fill="rgba(220,53,69,0.8)"><path d="M7.5 4L2 9l5.5 5V11c4.5 0 7.5 1.5 9 5-0.5-5-3.5-9-9-9V4z"/></svg>');
         $nameRow.append($replyBtn);
+        // Block button
+        var $blockBtn = $('<button class="block-btn" title="Block user">🚫</button>');
+        $blockBtn.attr('onclick', '_blockFromMsg("' + msg.username.replace(/"/g,'') + '"); event.stopPropagation();');
+        $nameRow.append($blockBtn);
         $wrap.append($nameRow);
     }
 
@@ -1686,6 +2128,15 @@ function listenOnlineUsers() {
 
                 imgWrap.appendChild(img);
                 imgWrap.appendChild(dot);
+                // Call button (only for others)
+                if (user.username !== me) {
+                    var callBtn = document.createElement('button');
+                    callBtn.className = 'online-call-btn';
+                    callBtn.title = 'Call ' + user.username;
+                    callBtn.textContent = '📞';
+                    callBtn.setAttribute('onclick', 'initiateCall("' + user.username.replace(/"/g,'') + '"); event.stopPropagation();');
+                    imgWrap.appendChild(callBtn);
+                }
                 wrap.appendChild(imgWrap);
                 wrap.appendChild(name);
                 wrap.appendChild(statusLbl);
@@ -1906,6 +2357,368 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(function () {});
     });
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ── Push / In-app Notifications ──────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+(function initNotifications() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') {
+        // Request permission after first user interaction
+        document.addEventListener('click', function ask() {
+            Notification.requestPermission();
+            document.removeEventListener('click', ask);
+        }, { once: true });
+    }
+})();
+
+var _notifTimer = null;
+function _showNotification(sender, body, avatar) {
+    // In-app banner (always)
+    var banner = document.getElementById('notifBanner');
+    banner.textContent = '💬 ' + sender + ': ' + (body || '…');
+    banner.classList.remove('show');
+    void banner.offsetWidth; // reflow to restart animation
+    banner.classList.add('show');
+    clearTimeout(_notifTimer);
+    _notifTimer = setTimeout(function () { banner.classList.remove('show'); }, 4000);
+
+    // OS notification (only when tab is hidden)
+    if (document.hidden && Notification.permission === 'granted') {
+        var n = new Notification('ApplesChat — ' + sender, {
+            body: body || '',
+            icon: avatar || 'https://imgur.com/57AweD4.png',
+            tag: 'appleschat-msg',
+            renotify: true
+        });
+        n.onclick = function () { window.focus(); n.close(); };
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ── Block / Unblock ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+function _getBlockedList() {
+    try { return JSON.parse(localStorage.getItem('blockedUsers') || '[]'); } catch(e) { return []; }
+}
+function _saveBlockedList(arr) {
+    localStorage.setItem('blockedUsers', JSON.stringify(arr));
+}
+function _isBlocked(username) {
+    return _getBlockedList().indexOf(username) !== -1;
+}
+function _blockUser(username) {
+    var list = _getBlockedList();
+    if (list.indexOf(username) === -1) { list.push(username); _saveBlockedList(list); }
+}
+function _unblockUser(username) {
+    var list = _getBlockedList().filter(function(u){ return u !== username; });
+    _saveBlockedList(list);
+}
+function _blockFromMsg(username) {
+    if (!username) return;
+    if (_isBlocked(username)) {
+        if (confirm('Unblock ' + username + '?')) { _unblockUser(username); }
+        return;
+    }
+    if (confirm('Block ' + username + '? Their messages will be hidden.')) {
+        _blockUser(username);
+        // Hide their existing messages in current view
+        document.querySelectorAll('.msg-row.other').forEach(function(row) {
+            var nameEl = row.querySelector('.badge-name-text');
+            if (nameEl && nameEl.textContent === username) row.style.display = 'none';
+        });
+    }
+}
+
+function openBlockedList() {
+    var inner = document.getElementById('blockedListInner');
+    inner.innerHTML = '';
+    var list = _getBlockedList();
+    if (list.length === 0) {
+        inner.innerHTML = '<div class="blocked-empty">No blocked users</div>';
+    } else {
+        list.forEach(function(uname) {
+            var item = document.createElement('div');
+            item.className = 'blocked-item';
+            var nameEl = document.createElement('span');
+            nameEl.className = 'blocked-item-name';
+            nameEl.textContent = uname;
+            var btn = document.createElement('button');
+            btn.className = 'unblock-btn';
+            btn.textContent = 'Unblock';
+            btn.onclick = function() {
+                _unblockUser(uname);
+                // Show their messages again
+                document.querySelectorAll('.msg-row.other').forEach(function(row) {
+                    var nameEl2 = row.querySelector('.badge-name-text');
+                    if (nameEl2 && nameEl2.textContent === uname) row.style.display = '';
+                });
+                item.remove();
+                if (inner.children.length === 0) inner.innerHTML = '<div class="blocked-empty">No blocked users</div>';
+            };
+            item.appendChild(nameEl);
+            item.appendChild(btn);
+            inner.appendChild(item);
+        });
+    }
+    document.getElementById('blockedModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function closeBlockedList() {
+    document.getElementById('blockedModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ── Background selector & Dark mode ──────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+var _bgClasses = ['bg-nature','bg-gradient1','bg-gradient2','bg-gradient3','bg-darkbg','bg-white'];
+
+function _applyTheme() {
+    var bg = localStorage.getItem('chatBg') || 'default';
+    var dark = localStorage.getItem('darkMode') === '1';
+    var shell = document.querySelector('.chat-shell');
+    // Remove all bg classes
+    _bgClasses.forEach(function(c){ shell.classList.remove(c); });
+    if (bg !== 'default') shell.classList.add('bg-' + bg);
+    // Dark mode on html element for max coverage
+    document.documentElement.classList.toggle('dark-mode', dark);
+    document.body.classList.toggle('dark-mode', dark);
+    // Highlight active swatch
+    document.querySelectorAll('.bg-swatch').forEach(function(el){ el.classList.remove('active'); });
+    var activeBtn = document.getElementById('bg-btn-' + bg);
+    if (activeBtn) activeBtn.classList.add('active');
+    // Sync toggle
+    var tog = document.getElementById('darkModeToggle');
+    if (tog) tog.checked = dark;
+}
+
+function setBg(name) {
+    localStorage.setItem('chatBg', name);
+    _applyTheme();
+}
+function toggleDarkMode(on) {
+    localStorage.setItem('darkMode', on ? '1' : '0');
+    _applyTheme();
+}
+
+function openSettings() {
+    _applyTheme(); // sync UI state
+    document.getElementById('settingsModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function closeSettings() {
+    document.getElementById('settingsModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// Apply saved theme on load
+_applyTheme();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ── WebRTC Calls (Firebase signaling) ────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+var _pc = null, _localStream = null, _callTimerInterval = null, _callSeconds = 0;
+var _activeCallId = null, _callRole = null; // 'caller' | 'callee'
+var _callMuted = false, _callVideoOff = false;
+
+var _rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+
+function initiateCall(targetUser) {
+    var me = localStorage.getItem('myUserName') || '';
+    if (!me || !targetUser) return;
+    var callId = me + '_' + targetUser + '_' + Date.now();
+    _activeCallId = callId;
+    _callRole = 'caller';
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(function(stream) {
+            _localStream = stream;
+            document.getElementById('callSelfVideo').srcObject = stream;
+            document.getElementById('callActiveName').textContent = '📞 Calling ' + targetUser + '…';
+            document.getElementById('callActiveTimer').textContent = '00:00';
+            document.getElementById('callActiveOverlay').classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            _pc = new RTCPeerConnection(_rtcConfig);
+            stream.getTracks().forEach(function(t){ _pc.addTrack(t, stream); });
+            _pc.ontrack = function(e) {
+                document.getElementById('callRemoteVideo').srcObject = e.streams[0];
+            };
+            _pc.onicecandidate = function(e) {
+                if (e.candidate) {
+                    try { firebase.database().ref('calls/' + callId + '/callerCandidates').push(e.candidate.toJSON()); } catch(err){}
+                }
+            };
+
+            _pc.createOffer().then(function(offer) {
+                return _pc.setLocalDescription(offer);
+            }).then(function() {
+                var myAvatar = localStorage.getItem('avatarImgData') || 'https://imgur.com/PVBYWRJ.png';
+                try {
+                    firebase.database().ref('calls/' + callId).set({
+                        caller: me, callee: targetUser, status: 'ringing',
+                        callerAvatar: myAvatar,
+                        offer: { type: _pc.localDescription.type, sdp: _pc.localDescription.sdp }
+                    });
+                } catch(err){}
+                // Listen for answer
+                try {
+                    firebase.database().ref('calls/' + callId + '/answer').on('value', function(snap) {
+                        if (!snap.val() || !_pc) return;
+                        var ans = snap.val();
+                        if (_pc.signalingState === 'have-local-offer') {
+                            _pc.setRemoteDescription(new RTCSessionDescription(ans)).catch(function(){});
+                            _startCallTimer();
+                            document.getElementById('callActiveName').textContent = '📞 ' + targetUser;
+                        }
+                    });
+                    // ICE from callee
+                    firebase.database().ref('calls/' + callId + '/calleeCandidates').on('child_added', function(snap) {
+                        if (_pc && snap.val()) _pc.addIceCandidate(new RTCIceCandidate(snap.val())).catch(function(){});
+                    });
+                    // Listen for reject/end
+                    firebase.database().ref('calls/' + callId + '/status').on('value', function(snap) {
+                        if (snap.val() === 'ended' || snap.val() === 'rejected') endCall();
+                    });
+                } catch(err){}
+            }).catch(function(err){ console.warn('Call offer error:', err); endCall(); });
+        })
+        .catch(function(err) { alert('Camera/mic access denied. Please allow permissions to make calls.'); });
+}
+
+function _listenForIncomingCalls() {
+    var me = localStorage.getItem('myUserName') || '';
+    if (!me) return;
+    try {
+        firebase.database().ref('calls').orderByChild('callee').equalTo(me).on('child_added', function(snap) {
+            var call = snap.val();
+            if (!call || call.status !== 'ringing') return;
+            var callId = snap.key;
+            if (_activeCallId) return; // Already in a call
+            _activeCallId = callId;
+            _callRole = 'callee';
+            document.getElementById('callIncomingName').textContent = call.caller;
+            document.getElementById('callIncomingLabel').textContent = '📞 Incoming call…';
+            document.getElementById('callIncomingAvatar').src = call.callerAvatar || 'https://imgur.com/PVBYWRJ.png';
+            document.getElementById('callIncomingOverlay').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        });
+    } catch(e){}
+}
+
+function acceptCall() {
+    document.getElementById('callIncomingOverlay').classList.remove('show');
+    if (!_activeCallId) return;
+    var callId = _activeCallId;
+    var callerName = document.getElementById('callIncomingName').textContent;
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(function(stream) {
+            _localStream = stream;
+            document.getElementById('callSelfVideo').srcObject = stream;
+            document.getElementById('callActiveName').textContent = '📞 ' + callerName;
+            document.getElementById('callActiveTimer').textContent = '00:00';
+            document.getElementById('callActiveOverlay').classList.add('show');
+
+            _pc = new RTCPeerConnection(_rtcConfig);
+            stream.getTracks().forEach(function(t){ _pc.addTrack(t, stream); });
+            _pc.ontrack = function(e) {
+                document.getElementById('callRemoteVideo').srcObject = e.streams[0];
+            };
+            _pc.onicecandidate = function(e) {
+                if (e.candidate) {
+                    try { firebase.database().ref('calls/' + callId + '/calleeCandidates').push(e.candidate.toJSON()); } catch(err){}
+                }
+            };
+            try {
+                firebase.database().ref('calls/' + callId + '/offer').once('value', function(snap) {
+                    var offer = snap.val();
+                    _pc.setRemoteDescription(new RTCSessionDescription(offer))
+                        .then(function() { return _pc.createAnswer(); })
+                        .then(function(answer) { return _pc.setLocalDescription(answer); })
+                        .then(function() {
+                            firebase.database().ref('calls/' + callId).update({
+                                answer: { type: _pc.localDescription.type, sdp: _pc.localDescription.sdp },
+                                status: 'active'
+                            });
+                            _startCallTimer();
+                            // ICE from caller
+                            firebase.database().ref('calls/' + callId + '/callerCandidates').on('child_added', function(s) {
+                                if (_pc && s.val()) _pc.addIceCandidate(new RTCIceCandidate(s.val())).catch(function(){});
+                            });
+                            firebase.database().ref('calls/' + callId + '/status').on('value', function(s) {
+                                if (s.val() === 'ended') endCall();
+                            });
+                        }).catch(function(err){ console.warn('Call answer error:', err); endCall(); });
+                });
+            } catch(err){ endCall(); }
+        })
+        .catch(function(err) { rejectCall(); alert('Camera/mic access denied.'); });
+}
+
+function rejectCall() {
+    document.getElementById('callIncomingOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+    if (_activeCallId) {
+        try { firebase.database().ref('calls/' + _activeCallId).update({ status: 'rejected' }); } catch(e){}
+    }
+    _activeCallId = null;
+    _callRole = null;
+}
+
+function endCall() {
+    if (_activeCallId) {
+        try { firebase.database().ref('calls/' + _activeCallId).update({ status: 'ended' }); } catch(e){}
+        try { firebase.database().ref('calls/' + _activeCallId).off(); } catch(e){}
+    }
+    if (_pc) { _pc.close(); _pc = null; }
+    if (_localStream) { _localStream.getTracks().forEach(function(t){ t.stop(); }); _localStream = null; }
+    clearInterval(_callTimerInterval); _callTimerInterval = null; _callSeconds = 0;
+    _activeCallId = null; _callRole = null; _callMuted = false; _callVideoOff = false;
+    document.getElementById('callActiveOverlay').classList.remove('show');
+    document.getElementById('callIncomingOverlay').classList.remove('show');
+    document.getElementById('callRemoteVideo').srcObject = null;
+    document.getElementById('callSelfVideo').srcObject = null;
+    document.body.style.overflow = '';
+}
+
+function toggleCallMute() {
+    _callMuted = !_callMuted;
+    if (_localStream) _localStream.getAudioTracks().forEach(function(t){ t.enabled = !_callMuted; });
+    var btn = document.getElementById('callMuteBtn');
+    btn.textContent = _callMuted ? '🔇' : '🎤';
+    btn.classList.toggle('muted', _callMuted);
+}
+function toggleCallVideo() {
+    _callVideoOff = !_callVideoOff;
+    if (_localStream) _localStream.getVideoTracks().forEach(function(t){ t.enabled = !_callVideoOff; });
+    var btn = document.getElementById('callVideoBtn');
+    btn.textContent = _callVideoOff ? '🚫' : '📹';
+    btn.classList.toggle('muted', _callVideoOff);
+}
+function toggleSpeaker() {
+    var btn = document.getElementById('callSpeakerBtn');
+    btn.classList.toggle('muted');
+    btn.textContent = btn.classList.contains('muted') ? '🔈' : '🔊';
+}
+
+function _startCallTimer() {
+    _callSeconds = 0;
+    clearInterval(_callTimerInterval);
+    _callTimerInterval = setInterval(function() {
+        _callSeconds++;
+        var m = Math.floor(_callSeconds / 60), s = _callSeconds % 60;
+        document.getElementById('callActiveTimer').textContent =
+            (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    }, 1000);
+}
+
+// Patch ESC key to also close overlays
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeSettings(); closeBlockedList(); endCall(); }
+});
 
 function stopGoLive() {
     if (_liveInterval) { clearInterval(_liveInterval); _liveInterval = null; }
