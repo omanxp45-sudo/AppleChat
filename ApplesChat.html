@@ -3818,19 +3818,15 @@ function _toggleReaction(msgKey, type) {
 
 // ── Link Preview ──────────────────────────────────────────────────────────────
 function _fetchLinkPreview(url, $bubble) {
-    fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url))
+    fetch('https://api.microlink.io/?url=' + encodeURIComponent(url))
     .then(function(r){ return r.json(); })
     .then(function(data) {
-        var html = data.contents || '';
-        function getOg(p) {
-            var m = html.match(new RegExp('<meta[^>]+property=["\']og:'+p+'["\'][^>]+content=["\']([^"\']*)["\']','i'));
-            if (!m) m = html.match(new RegExp('<meta[^>]+content=["\']([^"\']*)["\'][^>]+property=["\']og:'+p+'["\']','i'));
-            return m ? m[1] : '';
-        }
-        var title = getOg('title') || (html.match(/<title[^>]*>([^<]+)<\/title>/i)||[])[1] || '';
-        var desc  = getOg('description');
-        var img   = getOg('image');
-        var site  = getOg('site_name') || (url.match(/^https?:\/\/([^/]+)/)||[])[1] || '';
+        if (data.status !== 'success') return;
+        var d     = data.data || {};
+        var title = d.title || '';
+        var desc  = d.description || '';
+        var img   = (d.image && d.image.url) ? d.image.url : '';
+        var site  = d.publisher || (url.match(/^https?:\/\/([^/]+)/)||[])[1] || '';
         if (!title && !img) return;
         var $card = $('<a class="link-preview-card" target="_blank" rel="noopener">').attr('href', url);
         if (img) $card.append($('<img class="link-preview-thumb">').attr('src', img));

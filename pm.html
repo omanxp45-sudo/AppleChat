@@ -1024,19 +1024,15 @@ function _updateBlockUI() {
 
 // ── Link preview ──────────────────────────────────────────────────────────────
 function _pmFetchLinkPreview(url, container) {
-    fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url))
+    fetch('https://api.microlink.io/?url=' + encodeURIComponent(url))
     .then(function(r){ return r.json(); })
     .then(function(data) {
-        var html = data.contents || '';
-        function getOg(p) {
-            var m = html.match(new RegExp('<meta[^>]+property=["\']og:'+p+'["\'][^>]+content=["\']([^"\']*)["\']','i'));
-            if (!m) m = html.match(new RegExp('<meta[^>]+content=["\']([^"\']*)["\'][^>]+property=["\']og:'+p+'["\']','i'));
-            return m ? m[1] : '';
-        }
-        var title = getOg('title') || (html.match(/<title[^>]*>([^<]+)<\/title>/i)||[])[1] || '';
-        var desc  = getOg('description');
-        var img   = getOg('image');
-        var site  = getOg('site_name') || (url.match(/^https?:\/\/([^/]+)/)||[])[1] || '';
+        if (data.status !== 'success') return;
+        var d     = data.data || {};
+        var title = d.title || '';
+        var desc  = d.description || '';
+        var img   = (d.image && d.image.url) ? d.image.url : '';
+        var site  = d.publisher || (url.match(/^https?:\/\/([^/]+)/)||[])[1] || '';
         if (!title && !img) return;
         var a = document.createElement('a');
         a.className = 'link-preview-card'; a.href = url; a.target = '_blank'; a.rel = 'noopener';
@@ -1044,7 +1040,7 @@ function _pmFetchLinkPreview(url, container) {
         var info = document.createElement('div'); info.className = 'link-preview-info';
         if (site)  { var s=document.createElement('div'); s.className='link-preview-site';  s.textContent=site;              info.appendChild(s); }
         if (title) { var t=document.createElement('div'); t.className='link-preview-title'; t.textContent=title.slice(0,80); info.appendChild(t); }
-        if (desc)  { var d=document.createElement('div'); d.className='link-preview-desc';  d.textContent=desc.slice(0,120); info.appendChild(d); }
+        if (desc)  { var di=document.createElement('div'); di.className='link-preview-desc';  di.textContent=desc.slice(0,120); info.appendChild(di); }
         a.appendChild(info);
         container.appendChild(a);
     }).catch(function(){});
