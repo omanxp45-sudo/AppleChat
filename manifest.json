@@ -2,7 +2,7 @@
   "name": "ApplesChat",
   "short_name": "ApplesChat",
   "description": "Free real-time chat",
-  "start_url": "ApplesChat-11.html",
+  "start_url": "ApplesChat.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#b03025",
