@@ -187,13 +187,16 @@ html, body {
 }
 .tray-btn:active { background: rgba(255,255,255,0.6); }
 .tray-icon { font-size: 22px; line-height: 1; }
-.tray-sticker-wrap { flex: 0 0 auto; position: relative; }
+.tray-sticker-wrap { flex: 0 0 auto; }
 .tray-sticker-wrap .tray-btn { min-width: auto; }
 
 /* Sticker dropdown */
 .sticker-dropdown {
-    bottom: calc(100% + 6px); top: auto; left: 0;
-    width: min(230px, calc(100vw - 24px)); max-height: 220px;
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%);
+    width: min(92vw, 320px); max-height: 240px;
     overflow-y: auto; -webkit-overflow-scrolling: touch;
     display: none; flex-wrap: wrap; padding: 8px;
     border-radius: 14px;
@@ -201,7 +204,7 @@ html, body {
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255,255,255,0.65);
     box-shadow: 0 8px 28px rgba(0,0,0,0.14);
-    z-index: 200; position: absolute;
+    z-index: 9999;
 }
 .sticker-dropdown.show { display: flex; }
 .sticker-item {
@@ -455,6 +458,9 @@ var _recording = false, _mediaRecorder = null, _audioChunks = [];
 window.onload = function () {
     if (!ME)   { window.location.href = 'index.html'; return; }
     if (!PEER) { document.getElementById('pmEmpty').textContent = 'No user specified.'; return; }
+
+    // Portal sticker menu to <body> so it escapes overflow:hidden/auto on the tray
+    document.body.appendChild(document.getElementById('stickerMenu'));
 
     // Apply saved theme
     if (localStorage.getItem('darkMode') === '1') {

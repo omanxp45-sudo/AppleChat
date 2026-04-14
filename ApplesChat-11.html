@@ -1806,6 +1806,10 @@ html.dark-mode, body.dark-mode {
                 <span class="tray-icon">😊</span>
                 <span>Sticker</span>
             </button>
+        </div>
+
+        <!-- #stickerMenu is portalled to <body> to escape overflow:hidden/auto on the tray -->
+        <div style="display:none" id="__stickerMenuPlaceholder__">
             <div class="sticker-dropdown" id="stickerMenu">
                 <a class="dropdown-item sticker" href="#"><img src="https://i.imgur.com/PVBYWRJ.png"  alt=".."></a>
                 <a class="dropdown-item sticker" href="#"><img src="https://i.imgur.com/bgOYEUb.png"  alt=".."></a>
@@ -2357,6 +2361,11 @@ window.onload = function () {
         }).join('');
     }
     populateStickerMenu();
+
+    // Portal sticker menus to <body> so they escape overflow:hidden/auto on the tray
+    document.body.appendChild(document.getElementById('stickerMenu'));
+    var pmSD = document.getElementById('pmStickerDropdown');
+    if (pmSD) document.body.appendChild(pmSD);
 
     // Sticker toggle
     document.getElementById('stickerToggle').addEventListener('click', function (e) {
