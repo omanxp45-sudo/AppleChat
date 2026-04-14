@@ -326,6 +326,30 @@ html.dark-mode, body.dark-mode {
         <button class="tray-btn" onclick="document.getElementById('pmFileInput').click(); closeTray();" title="Photo">
             <span class="tray-icon">📷</span><span>Photo</span>
         </button>
+        <!-- Camera -->
+        <button class="tray-btn" onclick="openCamera(); closeTray();" title="Camera">
+            <span class="tray-icon">📸</span><span>Camera</span>
+        </button>
+        <!-- Poll -->
+        <button class="tray-btn" onclick="openPollModal(); closeTray();" title="Poll">
+            <span class="tray-icon">📊</span><span>Poll</span>
+        </button>
+        <!-- Event -->
+        <button class="tray-btn" onclick="openEventModal(); closeTray();" title="Event">
+            <span class="tray-icon">📅</span><span>Event</span>
+        </button>
+        <!-- Document -->
+        <button class="tray-btn" onclick="document.getElementById('pmDocInput').click(); closeTray();" title="Document">
+            <span class="tray-icon">📄</span><span>Doc</span>
+        </button>
+        <!-- Contact -->
+        <button class="tray-btn" onclick="openContactModal(); closeTray();" title="Contact">
+            <span class="tray-icon">👤</span><span>Contact</span>
+        </button>
+        <!-- Audio file -->
+        <button class="tray-btn" onclick="document.getElementById('pmAudioInput').click(); closeTray();" title="Audio">
+            <span class="tray-icon">🎵</span><span>Audio</span>
+        </button>
         <!-- Stickers -->
         <div class="tray-sticker-wrap">
             <button class="tray-btn" id="stickerBtn" onclick="toggleStickers(event)" title="Sticker">
@@ -396,6 +420,9 @@ html.dark-mode, body.dark-mode {
 
 <!-- Hidden inputs -->
 <input type="file" id="pmFileInput" accept="image/*" style="display:none;">
+<input type="file" id="pmCameraInput" accept="image/*" capture="environment" style="display:none;">
+<input type="file" id="pmDocInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip" style="display:none;">
+<input type="file" id="pmAudioInput" accept="audio/*" style="display:none;">
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -445,6 +472,45 @@ window.onload = function () {
                 sendMsg({ image_data: canvas.toDataURL('image/jpeg', 0.75) });
             };
             img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        this.value = '';
+    };
+
+    document.getElementById('pmCameraInput').onchange = function () {
+        var file = this.files[0]; if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var img = new Image();
+            img.onload = function () {
+                var canvas = document.createElement('canvas');
+                var max = 800, scale = Math.min(1, max / Math.max(img.width, img.height));
+                canvas.width = Math.round(img.width * scale);
+                canvas.height = Math.round(img.height * scale);
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                sendMsg({ image_data: canvas.toDataURL('image/jpeg', 0.75) });
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        this.value = '';
+    };
+
+    document.getElementById('pmDocInput').onchange = function () {
+        var file = this.files[0]; if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            sendMsg({ doc_data: e.target.result, doc_name: file.name, doc_size: file.size });
+        };
+        reader.readAsDataURL(file);
+        this.value = '';
+    };
+
+    document.getElementById('pmAudioInput').onchange = function () {
+        var file = this.files[0]; if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            sendMsg({ audio_file_data: e.target.result, audio_file_name: file.name });
         };
         reader.readAsDataURL(file);
         this.value = '';
@@ -518,7 +584,7 @@ function sendMsg(extra) {
     var input = document.getElementById('pmInput');
     var text  = input.value.trim();
     extra = extra || {};
-    if (!text && !extra.image_data && !extra.audio_data && !extra.sticker_url) return;
+    if (!text && !extra.image_data && !extra.audio_data && !extra.sticker_url && !extra.doc_data && !extra.audio_file_data && !extra.contact_name && !extra.event_title && !extra.poll_question) return;
     var myAvatar = localStorage.getItem('avatarImgData') || 'https://imgur.com/PVBYWRJ.png';
     var myStatus = localStorage.getItem('status') || '';
     input.value = ''; input.style.height = 'auto'; updateSendMic();
@@ -550,6 +616,89 @@ function appendMsg(msg) {
         var au = document.createElement('audio');
         au.controls = true; au.src = msg.audio_data;
         bubble.appendChild(au); isMedia = true;
+    } else if (msg.audio_file_data) {
+        var au = document.createElement('audio');
+        au.controls = true; au.src = msg.audio_file_data;
+        bubble.appendChild(au); isMedia = true;
+    } else if (msg.poll_question) {
+        var title = document.createElement('div');
+        title.style.fontWeight = '700';
+        title.style.marginBottom = '8px';
+        title.textContent = msg.poll_question;
+        bubble.appendChild(title);
+        var options = [];
+        try { options = JSON.parse(msg.poll_options || '[]'); } catch (e) {}
+        options.forEach(function (opt) {
+            var item = document.createElement('div');
+            item.style.padding = '8px 10px';
+            item.style.borderRadius = '12px';
+            item.style.background = 'rgba(255,255,255,0.8)';
+            item.style.marginBottom = '6px';
+            item.style.color = '#222';
+            item.textContent = opt;
+            bubble.appendChild(item);
+        });
+        isMedia = true;
+    } else if (msg.event_title) {
+        var title = document.createElement('div');
+        title.style.fontWeight = '700';
+        title.style.marginBottom = '6px';
+        title.textContent = msg.event_title;
+        bubble.appendChild(title);
+        if (msg.event_date) {
+            var dateLine = document.createElement('div');
+            dateLine.textContent = 'Date: ' + msg.event_date + (msg.event_time ? ' ' + msg.event_time : '');
+            bubble.appendChild(dateLine);
+        }
+        if (msg.event_location) {
+            var loc = document.createElement('div');
+            loc.textContent = 'Location: ' + msg.event_location;
+            bubble.appendChild(loc);
+        }
+        isMedia = true;
+    } else if (msg.doc_data) {
+        var title = document.createElement('div');
+        title.style.fontWeight = '700';
+        title.style.marginBottom = '8px';
+        title.textContent = msg.doc_name || 'Document';
+        bubble.appendChild(title);
+        var link = document.createElement('a');
+        link.href = msg.doc_data;
+        link.download = msg.doc_name || 'file';
+        link.textContent = '⬇ Download';
+        link.style.display = 'inline-block';
+        link.style.padding = '10px 14px';
+        link.style.borderRadius = '12px';
+        link.style.background = '#f0f0f0';
+        link.style.color = '#111';
+        link.style.textDecoration = 'none';
+        bubble.appendChild(link);
+        if (msg.doc_size) {
+            var size = document.createElement('div');
+            size.style.fontSize = '12px';
+            size.style.color = '#666';
+            size.style.marginTop = '6px';
+            size.textContent = Math.round(msg.doc_size / 1024) + ' KB';
+            bubble.appendChild(size);
+        }
+        isMedia = true;
+    } else if (msg.contact_name) {
+        var title = document.createElement('div');
+        title.style.fontWeight = '700';
+        title.style.marginBottom = '6px';
+        title.textContent = msg.contact_name;
+        bubble.appendChild(title);
+        if (msg.contact_phone) {
+            var phone = document.createElement('div');
+            phone.textContent = 'Phone: ' + msg.contact_phone;
+            bubble.appendChild(phone);
+        }
+        if (msg.contact_email) {
+            var email = document.createElement('div');
+            email.textContent = 'Email: ' + msg.contact_email;
+            bubble.appendChild(email);
+        }
+        isMedia = true;
     } else {
         if (msg.message) {
             var sp = document.createElement('span');
@@ -633,6 +782,39 @@ function toggleStickers(e) {
 
 function sendSticker(url) {
     sendMsg({ sticker_url: url }); closeTray();
+}
+
+function openCamera() {
+    document.getElementById('pmCameraInput').click();
+}
+
+function openPollModal() {
+    var question = prompt('Poll question:');
+    if (!question) return;
+    var options = prompt('Enter poll options separated by commas:');
+    if (!options) return;
+    var list = options.split(',').map(function (item) { return item.trim(); }).filter(Boolean);
+    if (list.length < 2) { alert('Add at least 2 options.'); return; }
+    sendMsg({ poll_id: 'poll_' + Date.now(), poll_question: question, poll_options: JSON.stringify(list) });
+}
+
+function openEventModal() {
+    var title = prompt('Event title:');
+    if (!title) return;
+    var date = prompt('Event date (YYYY-MM-DD):');
+    if (!date) return;
+    var time = prompt('Event time (HH:MM):');
+    var location = prompt('Location (optional):');
+    sendMsg({ event_title: title, event_date: date, event_time: time || '', event_location: location || '' });
+}
+
+function openContactModal() {
+    var name = prompt('Contact name:');
+    if (!name) return;
+    var phone = prompt('Phone number:');
+    if (!phone) return;
+    var email = prompt('Email (optional):');
+    sendMsg({ contact_name: name, contact_phone: phone, contact_email: email || '' });
 }
 
 // ── Voice ─────────────────────────────────────────────────────────────────────
