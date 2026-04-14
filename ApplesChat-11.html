@@ -548,8 +548,11 @@ html, body {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     padding: 0;
+    background: linear-gradient(135deg, #3355ff 0%, #0022ff 100%);
+    box-shadow: 0 0 16px rgba(0,34,255,0.75), 0 3px 10px rgba(0,34,255,0.5), inset 0 1px 0 rgba(160,180,255,0.5);
+    text-shadow: 0 1px 3px rgba(0,10,100,0.4);
 }
-.send-btn:active { transform: scale(0.93); background: #1da851; }
+.send-btn:active { transform: scale(0.93); background: #001acc; box-shadow: 0 0 8px rgba(0,34,255,0.5); }
 
 /* ── Mic silver SVG colour override ─────────────────────────────────────── */
 .mic-btn svg * { /* SVG uses its own gradients; no override needed */ }
@@ -927,13 +930,13 @@ html, body { background: linear-gradient(135deg, #c9d6ff 0%, #e2e2e2 50%, #fbc2e
 
 /* ── Send button — green glass ── */
 .send-btn {
-    background: rgba(37,211,102,0.72);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(100,240,150,0.5);
-    box-shadow: 0 4px 14px rgba(37,211,102,0.32), inset 0 1px 0 rgba(200,255,220,0.4);
+    background: linear-gradient(135deg, #3355ff 0%, #0022ff 100%) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(120,140,255,0.55) !important;
+    box-shadow: 0 0 20px rgba(0,34,255,0.8), 0 3px 12px rgba(0,34,255,0.55), inset 0 1px 0 rgba(160,180,255,0.5) !important;
 }
-.send-btn:active { background: rgba(29,168,81,0.85); }
+.send-btn:active { background: #001acc !important; box-shadow: 0 0 8px rgba(0,34,255,0.5) !important; }
 
 /* ── GoLive button — red glass ── */
 .golive-btn {
