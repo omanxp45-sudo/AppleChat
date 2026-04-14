@@ -197,15 +197,15 @@ label { font-weight: bold; }
                 lastSeen:  firebase.database.ServerValue.TIMESTAMP
             })
             .then(function () {
-                window.location.href = 'ApplesChat-11.html';
+                window.location.href = 'ApplesChat.html';
             })
             .catch(function (err) {
                 console.warn('Firebase write failed:', err.message);
-                window.location.href = 'ApplesChat-11.html';
+                window.location.href = 'ApplesChat.html';
             });
         } catch (err) {
             console.warn('Firebase error:', err.message);
-            window.location.href = 'ApplesChat-11.html';
+            window.location.href = 'ApplesChat.html';
         }
     }
 
