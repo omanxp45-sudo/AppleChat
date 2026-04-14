@@ -2900,9 +2900,6 @@ function sendEvent() {
 
 // ── Contact ───────────────────────────────────────────────────────────────────
 function openContactModal() {
-    // Hide address-book button if API not supported
-    var btn = document.getElementById('addrBookBtn');
-    if (btn) btn.style.display = ('contacts' in navigator) ? '' : 'none';
     document.getElementById('contactModal').classList.add('show');
 }
 function closeContactModal() { document.getElementById('contactModal').classList.remove('show'); }
