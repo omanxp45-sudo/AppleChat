@@ -697,8 +697,9 @@ function appendMsg(msg) {
         bubble.appendChild(title);
         var link = document.createElement('a');
         link.href = msg.doc_data;
-        link.download = msg.doc_name || 'file';
-        link.textContent = '⬇ Download';
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = '📂 Open';
         link.style.display = 'inline-block';
         link.style.padding = '10px 14px';
         link.style.borderRadius = '12px';
