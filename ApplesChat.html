@@ -1812,7 +1812,8 @@ html.dark-mode, body.dark-mode {
     padding:3px 5px; border-radius:6px; opacity:0.65; line-height:1;
     transition:opacity 0.12s, background 0.12s;
 }
-.add-friend-btn:hover { opacity:1; background:rgba(13,110,253,0.1); }
+.add-friend-btn:hover:not(:disabled) { opacity:1; background:rgba(13,110,253,0.1); }
+.add-friend-btn:disabled { cursor:default; opacity:0.9; color:#25d366; }
 
 /* ── Friends modal ── */
 .friends-modal { display:none; position:fixed; inset:0; z-index:7200; background:rgba(0,0,0,0.45); align-items:center; justify-content:center; }
@@ -2574,6 +2575,7 @@ window.onload = function () {
     heartbeat();
     setInterval(heartbeat, 30000);
     listenOnlineUsers();
+    _listenFriends();
     // Listen for incoming calls + PMs after Firebase is ready
     setTimeout(function() {
         _listenForIncomingCalls();
@@ -2720,7 +2722,12 @@ function appendMessage(msg) {
         $blockBtn.attr('onclick', '_blockFromMsg("' + msg.username.replace(/"/g,'') + '"); event.stopPropagation();');
         $nameRow.append($blockBtn);
         // Add Friend button
-        var $afBtn = $('<button class="add-friend-btn" title="Add Friend">👥+</button>');
+        var _isFriend = _myFriends.has(msg.username);
+        var $afBtn = $('<button class="add-friend-btn">')
+            .attr('data-user', msg.username)
+            .attr('title', _isFriend ? 'Already a friend' : 'Add Friend')
+            .prop('disabled', _isFriend)
+            .text(_isFriend ? '✓' : '👥+');
         (function(u,av){ $afBtn.on('click', function(e){ e.stopPropagation(); addFriend(u, av); }); })(msg.username, msg.avatar||'');
         $nameRow.append($afBtn);
         $wrap.append($nameRow);
@@ -3936,6 +3943,26 @@ function _fetchLinkPreview(url, $bubble) {
 }
 
 // ── Friends ───────────────────────────────────────────────────────────────────
+var _myFriends = new Set(); // live cache of friend usernames
+
+function _listenFriends() {
+    var me = localStorage.getItem('myUserName') || '';
+    if (!me) return;
+    firebase.database().ref('friends/' + me).on('value', function(snap) {
+        _myFriends.clear();
+        var d = snap.val();
+        if (d) Object.keys(d).forEach(function(u){ _myFriends.add(u); });
+        // Refresh all add-friend buttons already rendered in the chat
+        document.querySelectorAll('.add-friend-btn').forEach(function(btn) {
+            var u = btn.getAttribute('data-user');
+            if (!u) return;
+            btn.textContent  = _myFriends.has(u) ? '✓' : '👥+';
+            btn.disabled     = _myFriends.has(u);
+            btn.title        = _myFriends.has(u) ? 'Already a friend' : 'Add Friend';
+        });
+    });
+}
+
 function openFriendsModal() {
     document.getElementById('friendsModal').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -3948,15 +3975,25 @@ function closeFriendsModal() {
 function addFriend(username, avatar) {
     var me = localStorage.getItem('myUserName') || '';
     if (!me || username === me) return;
-    firebase.database().ref('friends/' + me + '/' + username).set({ avatar: avatar || '', addedAt: firebase.database.ServerValue.TIMESTAMP });
-    // Visual feedback
+    if (_myFriends.has(username)) {
+        // Already a friend — give feedback but don't re-add
+        var btn = event && event.target;
+        if (btn) { var orig = btn.textContent; btn.textContent = '✓ Added'; setTimeout(function(){ btn.textContent = '✓'; }, 1200); }
+        return;
+    }
+    firebase.database().ref('friends/' + me + '/' + username).set({
+        avatar: avatar || '', addedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+    // Optimistic local update (Firebase listener will also update)
+    _myFriends.add(username);
     var btn = event && event.target;
-    if (btn) { var orig = btn.textContent; btn.textContent = '✓'; setTimeout(function(){ btn.textContent = orig; }, 1200); }
+    if (btn) { btn.textContent = '✓'; btn.disabled = true; btn.title = 'Already a friend'; }
 }
 function removeFriend(username) {
     var me = localStorage.getItem('myUserName') || '';
     if (!me) return;
     firebase.database().ref('friends/' + me + '/' + username).remove();
+    _myFriends.delete(username);
 }
 function _loadFriends() {
     var me = localStorage.getItem('myUserName') || '';
