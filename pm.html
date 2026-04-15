@@ -386,17 +386,22 @@ html.dark-mode, body.dark-mode {
 .pm-blocked-banner { background:rgba(220,53,69,0.12); color:#dc3545; text-align:center; padding:10px; font-size:13px; font-weight:600; display:none; }
 .pm-blocked-banner.show { display:block; }
 
-/* Timestamp below sticker / voice-note (sibling of bubble) */
+/* Column wrapper: stacks bubble → ts-below → reactions vertically */
+.pm-msg-col {
+    display: flex; flex-direction: column; max-width: 100%;
+}
+.pm-row.me    .pm-msg-col { align-items: flex-end; }
+.pm-row.other .pm-msg-col { align-items: flex-start; }
+
+/* Timestamp below sticker / voice-note */
 .pm-bubble-ts-below {
-    display: block; text-align: right;
     font-size: 10px; color: #999; white-space: nowrap;
-    padding: 2px 2px 0; align-self: flex-end;
+    padding: 2px 2px 0;
 }
 .dark-mode .pm-bubble-ts-below { color: rgba(255,255,255,0.38); }
 
 /* PM Reactions */
 .pm-reactions { display:flex; gap:5px; margin-top:3px; }
-.pm-row.me .pm-reactions { justify-content:flex-end; }
 .pm-react-btn {
     display:flex; align-items:center; gap:3px; padding:2px 8px;
     border-radius:12px; border:1px solid rgba(0,0,0,0.1);
@@ -879,23 +884,25 @@ function appendMsg(msg, msgKey) {
     if (isMedia) bubble.classList.add('media-bubble');
     if (isVisualMedia) bubble.classList.add('visual-media');
 
+    // Column wrapper: bubble → ts → reactions stacked vertically
+    var msgCol = document.createElement('div');
+    msgCol.className = 'pm-msg-col';
+    msgCol.appendChild(bubble);
+
     if (msg.created_at) {
         if (isMedia && !isVisualMedia) {
-            // Sticker / voice note: ts as sibling below bubble, right-aligned
-            row.appendChild(bubble);
+            // Sticker / voice note: ts below bubble
             var ts = document.createElement('span');
             ts.className = 'pm-bubble-ts-below';
             ts.textContent = formatTime(msg.created_at);
-            row.appendChild(ts);
+            msgCol.appendChild(ts);
         } else {
+            // Text / visual media: ts inside bubble (absolute bottom-right)
             var ts = document.createElement('span');
             ts.className = 'pm-bubble-ts';
             ts.textContent = formatTime(msg.created_at);
             bubble.appendChild(ts);
-            row.appendChild(bubble);
         }
-    } else {
-        row.appendChild(bubble);
     }
 
     // ── Reactions ──
@@ -912,7 +919,7 @@ function appendMsg(msg, msgKey) {
         dislikeBtn.onclick = function(){ _pmToggleReaction(msgKey, 'dislike'); };
         reacts.appendChild(likeBtn);
         reacts.appendChild(dislikeBtn);
-        row.appendChild(reacts);
+        msgCol.appendChild(reacts);
         try {
             firebase.database().ref('pm_reactions/' + CHAT_ID + '/' + msgKey).on('value', function(snap) {
                 var d  = snap.val() || {};
@@ -926,6 +933,7 @@ function appendMsg(msg, msgKey) {
         } catch(e) {}
     }
 
+    row.appendChild(msgCol);
     body.appendChild(row);
 }
 
