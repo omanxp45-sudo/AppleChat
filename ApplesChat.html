@@ -378,14 +378,21 @@ html, body {
 }
 .bubble.bubble-media::before,
 .bubble.bubble-media::after { display: none; }
-/* Timestamp overlaid on media with dark pill */
-.bubble.bubble-media .bubble-ts {
+/* Timestamp overlaid on visual media (image/video) with dark pill */
+.bubble.bubble-visual .bubble-ts {
     background: rgba(0,0,0,0.42);
     color: #fff !important;
     border-radius: 10px;
     padding: 1px 6px;
     z-index: 2;
 }
+/* Timestamp below sticker / voice-note bubble */
+.bubble-ts-below {
+    display: block; text-align: right;
+    font-size: 10px; color: #999; white-space: nowrap;
+    padding: 2px 4px 0;
+}
+.dark-mode .bubble-ts-below { color: rgba(255,255,255,0.4); }
 
 .bubble .chat-upload {
     max-width: 220px;
@@ -2642,7 +2649,8 @@ function appendMessage(msg) {
     var $row    = $('<div>').addClass('msg-row').addClass(isMe ? 'me' : 'other');
     var $wrap   = $('<div class="bubble-wrap">');
     var $bubble = $('<div class="bubble">');
-    var isMedia = false;
+    var isMedia  = false;
+    var isVisual = false; // only true for image-only / video overlay
 
     if (!isMe) {
         var previewText = msg.message ? msg.message.slice(0, 60)
@@ -2804,7 +2812,7 @@ function appendMessage(msg) {
             var $img = $('<img class="chat-upload">').attr('src', msg.image_data);
             $img.on('click', function () { openLightbox(msg.image_data); });
             $bubble.append($img);
-            if (!msg.message) isMedia = true;
+            if (!msg.message) { isMedia = true; isVisual = true; }
         }
     }
 
@@ -2822,15 +2830,20 @@ function appendMessage(msg) {
         $bubble.prepend($quote);
     } else if (isMedia) {
         $bubble.addClass('bubble-media');
+        if (isVisual) $bubble.addClass('bubble-visual');
     }
 
     var ts = msg.created_at ? formatTime(msg.created_at) : '';
-    // Always place timestamp inside the bubble (bottom-right)
-    if (ts) {
+    if (ts && !(isMedia && !isVisual)) {
+        // Text, cards, image overlay: ts inside the bubble
         $bubble.append('<span class="bubble-ts">' + ts + '</span>');
     }
 
     $wrap.append($bubble);
+    if (ts && isMedia && !isVisual) {
+        // Sticker / voice note: ts sits below the bubble, right-aligned
+        $wrap.append('<span class="bubble-ts-below">' + ts + '</span>');
+    }
 
     // ── Link preview for text messages containing a URL ──
     if (msg.message && /https?:\/\//.test(msg.message)) {
