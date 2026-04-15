@@ -827,6 +827,17 @@ html, body {
 .crop-btn.primary { background: #e74c3c; color: #fff; }
 .crop-btn.secondary { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); }
 .crop-btn:active { opacity: 0.8; }
+.caption-input {
+    width: 100%; max-width: 460px; box-sizing: border-box;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 22px; padding: 10px 16px; color: #fff; font-size: 15px; outline: none;
+}
+.caption-input::placeholder { color: rgba(255,255,255,0.45); }
+.room-count-badge {
+    background: rgba(255,255,255,0.18); color: #fff;
+    font-size: 11px; font-weight: 700; border-radius: 10px;
+    padding: 1px 7px; margin-left: auto;
+}
 
 /* ── GoLive PiP card (same size as sent image) ───────────────────────────── */
 .golive-pip {
@@ -2139,16 +2150,28 @@ html.dark-mode, body.dark-mode {
     </div>
 </div>
 
-<!-- Crop / Rotate modal -->
+<!-- Crop / Rotate / Caption modal -->
 <div class="crop-overlay" id="cropOverlay">
     <canvas id="cropCanvas"></canvas>
-    <div class="crop-hint">Drag on image to crop &nbsp;|&nbsp; Rotate buttons below</div>
+    <div class="crop-hint">Drag to crop &nbsp;|&nbsp; Rotate below</div>
+    <input class="caption-input" id="cropCaption" placeholder="Add a caption…" maxlength="200" autocomplete="off">
     <div class="crop-controls">
         <button class="crop-btn secondary" onclick="rotateCrop(-90)">&#8634; Left</button>
         <button class="crop-btn secondary" onclick="rotateCrop(90)">&#8635; Right</button>
         <button class="crop-btn secondary" onclick="resetCrop()">Reset</button>
         <button class="crop-btn primary"   onclick="applyCrop()">&#10003; Send</button>
         <button class="crop-btn secondary" onclick="cancelCrop()">Cancel</button>
+    </div>
+</div>
+
+<!-- Video preview + caption -->
+<div class="crop-overlay" id="videoCaptionOverlay">
+    <video id="videoCaptionPreview" controls
+           style="max-width:min(95vw,460px);max-height:55vh;border-radius:10px;background:#000;display:block;"></video>
+    <input class="caption-input" id="videoCaption" placeholder="Add a caption…" maxlength="200" autocomplete="off">
+    <div class="crop-controls">
+        <button class="crop-btn primary"   onclick="sendVideoWithCaption()">&#10003; Send</button>
+        <button class="crop-btn secondary" onclick="cancelVideoCaption()">Cancel</button>
     </div>
 </div>
 
@@ -2395,7 +2418,7 @@ window.onload = function () {
             (function(f) {
                 reader.onload = function (e) {
                     if (f.type.startsWith('video/')) {
-                        postToFirebase({ video_data: e.target.result, video_name: f.name });
+                        openVideoCaption(e.target.result);
                     } else {
                         openCropModal(e.target.result);
                     }
@@ -2579,6 +2602,11 @@ function connectFirebase() { connectToRoom(_currentRoomPath); }
 
 function connectToRoom(path) {
     _currentRoomPath = path;
+    // Track which room this user is in (for online-per-room counts)
+    var _me = localStorage.getItem('myUserName') || '';
+    if (_me) {
+        try { firebase.database().ref('users/' + _me).update({ currentRoom: path }); } catch(e) {}
+    }
     try {
         var db  = firebase.database();
         if (_mainRef) { _mainRef.off(); _mainRef = null; }
@@ -3174,7 +3202,8 @@ function heartbeat() {
     } catch (e) {}
 }
 
-var _onlineSet = new Set(); // usernames currently online
+var _onlineSet     = new Set(); // usernames currently online
+var _onlineRoomMap = {};        // { username: currentRoom }
 
 function toggleOnlineBar() {
     var bar  = document.getElementById('onlineBar');
@@ -3258,6 +3287,15 @@ function listenOnlineUsers() {
             });
 
             _onlineSet = newOnlineSet;
+
+            // Rebuild room map for online count per room
+            _onlineRoomMap = {};
+            snapshot.forEach(function(child) {
+                var u = child.val();
+                if (u && u.username && u.lastSeen && (Date.now() - u.lastSeen < 3 * 60 * 1000)) {
+                    _onlineRoomMap[u.username] = u.currentRoom || 'messages';
+                }
+            });
 
             // Update all badge status dots in the chat
             document.querySelectorAll('.badge-status-dot').forEach(function (el) {
@@ -3408,15 +3446,39 @@ function applyCrop() {
         out.width = canvas.width; out.height = canvas.height;
         out.getContext('2d').drawImage(canvas, 0, 0);
     }
-    document.getElementById('baseimage').value = out.toDataURL('image/jpeg', 0.88);
+    var imageData = out.toDataURL('image/jpeg', 0.88);
+    var caption   = document.getElementById('cropCaption').value.trim();
+    document.getElementById('cropCaption').value = '';
     cancelCrop();
-    sendFunction();
+    postToFirebase({ image_data: imageData, message: caption || null });
 }
 function cancelCrop() {
     document.getElementById('cropOverlay').classList.remove('show');
     document.body.style.overflow = '';
     _cropImg = null;
     _cropSX = _cropSY = _cropEX = _cropEY = undefined;
+}
+
+// Video preview + caption
+var _pendingVideoData = null;
+function openVideoCaption(dataUrl) {
+    _pendingVideoData = dataUrl;
+    document.getElementById('videoCaptionPreview').src = dataUrl;
+    document.getElementById('videoCaption').value = '';
+    document.getElementById('videoCaptionOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function sendVideoWithCaption() {
+    var caption = document.getElementById('videoCaption').value.trim();
+    var data    = _pendingVideoData;
+    cancelVideoCaption();
+    if (data) postToFirebase({ video_data: data, message: caption || null });
+}
+function cancelVideoCaption() {
+    document.getElementById('videoCaptionOverlay').classList.remove('show');
+    document.getElementById('videoCaptionPreview').src = '';
+    document.body.style.overflow = '';
+    _pendingVideoData = null;
 }
 
 // ── GoLive ────────────────────────────────────────────────────────────────────
@@ -4004,6 +4066,9 @@ function _renderRooms() {
         $info.append($('<div class="room-sub">').text(room.sub));
         $btn.append($info);
         if (room.path === _currentRoomPath) $btn.append($('<span class="room-active-badge">').text('Current'));
+        // Online count badge
+        var roomCount = Object.values(_onlineRoomMap).filter(function(r){ return r === room.path; }).length;
+        if (roomCount > 0) $btn.append($('<span class="room-count-badge">').text('👤 ' + roomCount));
         $btn.on('click', function(){
             _currentRoomName = room.flag + ' ' + room.name;
             closeRoomsPanel();
