@@ -118,6 +118,12 @@ label { font-weight: bold; }
     </button>
 </div>
 
+<div style="text-align:center; margin: 10px auto; font-size:13px; color:#555; width:min(320px,calc(100% - 24px));">
+    <span>👥 Today: <b id="todayCount">…</b></span>
+    &nbsp;|&nbsp;
+    <span>🌐 Total: <b id="totalCount">…</b></span>
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -126,10 +132,30 @@ label { font-weight: bold; }
 <script>
     var DEFAULT_AVATAR = 'https://imgur.com/PVBYWRJ.png';
 
+    // ── Visitor stats ─────────────────────────────────────────────────────────
+    function trackVisitor() {
+        try {
+            var db = firebase.database();
+            var today = new Date().toISOString().slice(0,10).replace(/-/g,'');
+            if (!sessionStorage.getItem('acVisit')) {
+                sessionStorage.setItem('acVisit', '1');
+                db.ref('stats/daily/' + today).transaction(function(v){ return (v||0)+1; });
+                db.ref('stats/total').transaction(function(v){ return (v||0)+1; });
+            }
+            db.ref('stats/daily/' + today).on('value', function(s){
+                document.getElementById('todayCount').textContent = s.val() || 0;
+            });
+            db.ref('stats/total').on('value', function(s){
+                document.getElementById('totalCount').textContent = s.val() || 0;
+            });
+        } catch(e) {}
+    }
+
     // ── Restore saved values ──────────────────────────────────────────────────
     window.onload = function () {
         document.getElementById('myUserName').value = localStorage.getItem('myUserName') || '';
         document.getElementById('status').value     = localStorage.getItem('status')     || '';
+        trackVisitor();
 
         var savedAvatar = localStorage.getItem('avatarImgData');
         if (savedAvatar) document.getElementById('avatar').src = savedAvatar;

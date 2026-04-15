@@ -140,6 +140,17 @@ html, body {
     -webkit-overflow-scrolling: touch;
 }
 .online-bar::-webkit-scrollbar { height: 0; }
+.online-bar-close-btn {
+    margin-left: auto; flex-shrink: 0;
+    background: none; border: none; cursor: pointer;
+    font-size: 18px; color: #bbb; line-height: 1; padding: 0 4px;
+}
+.online-bar-close-btn:hover { color: #888; }
+.online-bar-tab {
+    cursor: pointer; background: #fff; border-bottom: 1px solid #e8e8e8;
+    padding: 4px 14px; font-size: 14px; text-align: left;
+    color: #888; user-select: none;
+}
 .online-bar-label {
     font-size: 10px;
     font-weight: 700;
@@ -1862,7 +1873,9 @@ html.dark-mode, body.dark-mode {
     <!-- Online users bar -->
     <div class="online-bar" id="onlineBar">
         <span class="online-bar-label">Online</span>
+        <button class="online-bar-close-btn" onclick="toggleOnlineBar()" title="Hide online bar">×</button>
     </div>
+    <div class="online-bar-tab" id="onlineBarTab" style="display:none" onclick="toggleOnlineBar()">👥</div>
 
     <!-- Status / connection bar -->
     <div class="status-bar" id="dbStatus">Connecting…</div>
@@ -3150,6 +3163,14 @@ function heartbeat() {
 
 var _onlineSet = new Set(); // usernames currently online
 
+function toggleOnlineBar() {
+    var bar  = document.getElementById('onlineBar');
+    var tab  = document.getElementById('onlineBarTab');
+    var hidden = bar.style.display === 'none';
+    bar.style.display  = hidden ? '' : 'none';
+    tab.style.display  = hidden ? 'none' : '';
+}
+
 function listenOnlineUsers() {
     try {
         firebase.database().ref('users').on('value', function (snapshot) {
@@ -3897,19 +3918,43 @@ function _loadFriends() {
 // ── Rooms ─────────────────────────────────────────────────────────────────────
 var _myCountryCode = '';
 var _ROOMS = [
-    { path:'messages',    flag:'🌐', name:'Global',        sub:'Everyone' },
-    { path:'rooms_US',    flag:'🇺🇸', name:'United States',  sub:'#us' },
-    { path:'rooms_GB',    flag:'🇬🇧', name:'United Kingdom', sub:'#uk' },
+    { path:'messages',    flag:'🌐', name:'Global',          sub:'Everyone' },
+    // ── Arab Gulf ──
     { path:'rooms_SA',    flag:'🇸🇦', name:'Saudi Arabia',   sub:'#sa' },
     { path:'rooms_AE',    flag:'🇦🇪', name:'UAE',            sub:'#ae' },
+    { path:'rooms_KW',    flag:'🇰🇼', name:'Kuwait',         sub:'#kw' },
+    { path:'rooms_QA',    flag:'🇶🇦', name:'Qatar',          sub:'#qa' },
+    { path:'rooms_BH',    flag:'🇧🇭', name:'Bahrain',        sub:'#bh' },
+    { path:'rooms_OM',    flag:'🇴🇲', name:'Oman',           sub:'#om' },
+    { path:'rooms_IQ',    flag:'🇮🇶', name:'Iraq',           sub:'#iq' },
+    { path:'rooms_JO',    flag:'🇯🇴', name:'Jordan',         sub:'#jo' },
+    { path:'rooms_LB',    flag:'🇱🇧', name:'Lebanon',        sub:'#lb' },
     { path:'rooms_EG',    flag:'🇪🇬', name:'Egypt',          sub:'#eg' },
-    { path:'rooms_IN',    flag:'🇮🇳', name:'India',          sub:'#in' },
-    { path:'rooms_PK',    flag:'🇵🇰', name:'Pakistan',       sub:'#pk' },
+    { path:'rooms_MA',    flag:'🇲🇦', name:'Morocco',        sub:'#ma' },
+    // ── Europe ──
+    { path:'rooms_GB',    flag:'🇬🇧', name:'United Kingdom', sub:'#uk' },
     { path:'rooms_DE',    flag:'🇩🇪', name:'Germany',        sub:'#de' },
     { path:'rooms_FR',    flag:'🇫🇷', name:'France',         sub:'#fr' },
-    { path:'rooms_BR',    flag:'🇧🇷', name:'Brazil',         sub:'#br' },
+    { path:'rooms_ES',    flag:'🇪🇸', name:'Spain',          sub:'#es' },
+    { path:'rooms_IT',    flag:'🇮🇹', name:'Italy',          sub:'#it' },
+    { path:'rooms_NL',    flag:'🇳🇱', name:'Netherlands',    sub:'#nl' },
+    { path:'rooms_BE',    flag:'🇧🇪', name:'Belgium',        sub:'#be' },
+    { path:'rooms_SE',    flag:'🇸🇪', name:'Sweden',         sub:'#se' },
+    { path:'rooms_NO',    flag:'🇳🇴', name:'Norway',         sub:'#no' },
+    { path:'rooms_DK',    flag:'🇩🇰', name:'Denmark',        sub:'#dk' },
+    { path:'rooms_FI',    flag:'🇫🇮', name:'Finland',        sub:'#fi' },
+    { path:'rooms_PL',    flag:'🇵🇱', name:'Poland',         sub:'#pl' },
+    { path:'rooms_PT',    flag:'🇵🇹', name:'Portugal',       sub:'#pt' },
+    { path:'rooms_GR',    flag:'🇬🇷', name:'Greece',         sub:'#gr' },
+    { path:'rooms_AT',    flag:'🇦🇹', name:'Austria',        sub:'#at' },
+    { path:'rooms_CH',    flag:'🇨🇭', name:'Switzerland',    sub:'#ch' },
+    { path:'rooms_IE',    flag:'🇮🇪', name:'Ireland',        sub:'#ie' },
     { path:'rooms_TR',    flag:'🇹🇷', name:'Turkey',         sub:'#tr' },
-    { path:'rooms_MA',    flag:'🇲🇦', name:'Morocco',        sub:'#ma' },
+    // ── Other ──
+    { path:'rooms_US',    flag:'🇺🇸', name:'United States',  sub:'#us' },
+    { path:'rooms_IN',    flag:'🇮🇳', name:'India',          sub:'#in' },
+    { path:'rooms_PK',    flag:'🇵🇰', name:'Pakistan',       sub:'#pk' },
+    { path:'rooms_BR',    flag:'🇧🇷', name:'Brazil',         sub:'#br' },
 ];
 function openRoomsPanel() {
     document.getElementById('roomsModal').classList.add('show');

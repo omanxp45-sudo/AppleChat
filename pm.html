@@ -14,7 +14,7 @@
 html, body {
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #c9d6ff 0%, #e2e2e2 50%, #fbc2eb 100%) fixed;
+    background: #e5ddd5;
     overscroll-behavior: none;
 }
 @supports (height: 100dvh) { html, body { height: 100dvh; } }
@@ -23,9 +23,7 @@ html, body {
 .pm-shell {
     display: flex; flex-direction: column;
     height: 100vh; max-width: 600px; margin: 0 auto;
-    background: rgba(229,221,213,0.45);
-    backdrop-filter: blur(18px) saturate(1.4);
-    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    background: #e5ddd5;
     box-shadow: 0 0 24px rgba(0,0,0,0.18);
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
@@ -387,6 +385,28 @@ html.dark-mode, body.dark-mode {
 /* Blocked banner */
 .pm-blocked-banner { background:rgba(220,53,69,0.12); color:#dc3545; text-align:center; padding:10px; font-size:13px; font-weight:600; display:none; }
 .pm-blocked-banner.show { display:block; }
+
+/* PM Reactions */
+.pm-reactions { display:flex; gap:5px; margin-top:3px; }
+.pm-row.me .pm-reactions { justify-content:flex-end; }
+.pm-react-btn {
+    display:flex; align-items:center; gap:3px; padding:2px 8px;
+    border-radius:12px; border:1px solid rgba(0,0,0,0.1);
+    background:rgba(255,255,255,0.7); font-size:12px; cursor:pointer;
+    transition:background 0.12s, transform 0.1s; color:#444;
+}
+.pm-react-btn:active { transform:scale(0.93); }
+.pm-react-btn.liked    { background:rgba(37,211,102,0.22); border-color:rgba(37,211,102,0.4); }
+.pm-react-btn.disliked { background:rgba(220,53,69,0.14);  border-color:rgba(220,53,69,0.3); }
+.dark-mode .pm-react-btn { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.15); color:#eee; }
+
+/* Game notification banner */
+.game-notif {
+    display:none; background:rgba(13,110,253,0.12); color:#0d6efd;
+    padding:8px 14px; font-size:13px; font-weight:600;
+    text-align:center; cursor:pointer;
+}
+.game-notif.show { display:block; }
 </style>
 </head>
 <body>
@@ -409,6 +429,9 @@ html.dark-mode, body.dark-mode {
 
     <!-- Blocked banner -->
     <div class="pm-blocked-banner" id="pmBlockedBanner">🚫 You have blocked this user. <button onclick="toggleBlockPeer()" style="background:none;border:none;color:#dc3545;font-weight:700;cursor:pointer;text-decoration:underline;">Unblock</button></div>
+
+    <!-- Game invite notification -->
+    <div class="game-notif" id="gameNotif" onclick="openGamePanel()">🎮 <span id="gameNotifText">wants to play!</span> — Tap to open</div>
 
     <!-- Messages -->
     <div class="pm-body" id="pmBody">
@@ -444,6 +467,10 @@ html.dark-mode, body.dark-mode {
         <!-- Audio file -->
         <button class="tray-btn" onclick="document.getElementById('pmAudioInput').click(); closeTray();" title="Audio">
             <span class="tray-icon">🎵</span><span>Audio</span>
+        </button>
+        <!-- Location -->
+        <button class="tray-btn" onclick="shareLocation(); closeTray();" title="Location">
+            <span class="tray-icon">📍</span><span>Location</span>
         </button>
         <!-- Games -->
         <button class="tray-btn" onclick="openGamePanel(); closeTray();" title="Games">
@@ -645,6 +672,7 @@ window.onload = function () {
 
     loadMessages();
     listenOnlineStatus();
+    _listenGameNotif();
 };
 
 // ── Firebase ──────────────────────────────────────────────────────────────────
@@ -662,7 +690,7 @@ function loadMessages() {
             if (rows.length === 0) {
                 body.innerHTML = '<div class="pm-empty">No messages yet.<br>Say hi! 👋</div>';
             } else {
-                rows.forEach(function (r) { _loadedIds.add(r.key); appendMsg(r.val); });
+                rows.forEach(function (r) { _loadedIds.add(r.key); appendMsg(r.val, r.key); });
                 scrollBottom();
             }
         });
@@ -672,7 +700,7 @@ function loadMessages() {
             _loadedIds.add(snap.key);
             var empty = document.getElementById('pmEmpty');
             if (empty) empty.remove();
-            appendMsg(snap.val());
+            appendMsg(snap.val(), snap.key);
             scrollBottom();
         });
     } catch (e) { console.warn(e); }
@@ -713,7 +741,7 @@ function sendMsg(extra) {
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
-function appendMsg(msg) {
+function appendMsg(msg, msgKey) {
     var isMe = msg.from === ME;
     var body = document.getElementById('pmBody');
     var row  = document.createElement('div');
@@ -850,6 +878,35 @@ function appendMsg(msg) {
         bubble.appendChild(ts);
     }
     row.appendChild(bubble);
+
+    // ── Reactions ──
+    if (msgKey) {
+        var reacts = document.createElement('div');
+        reacts.className = 'pm-reactions';
+        var likeBtn    = document.createElement('button');
+        likeBtn.className = 'pm-react-btn';
+        likeBtn.innerHTML = '👍 <span>0</span>';
+        var dislikeBtn = document.createElement('button');
+        dislikeBtn.className = 'pm-react-btn';
+        dislikeBtn.innerHTML = '👎 <span>0</span>';
+        likeBtn.onclick    = function(){ _pmToggleReaction(msgKey, 'like'); };
+        dislikeBtn.onclick = function(){ _pmToggleReaction(msgKey, 'dislike'); };
+        reacts.appendChild(likeBtn);
+        reacts.appendChild(dislikeBtn);
+        row.appendChild(reacts);
+        try {
+            firebase.database().ref('pm_reactions/' + CHAT_ID + '/' + msgKey).on('value', function(snap) {
+                var d  = snap.val() || {};
+                var lk = d.likes    ? Object.keys(d.likes).length    : 0;
+                var dk = d.dislikes ? Object.keys(d.dislikes).length : 0;
+                likeBtn.querySelector('span').textContent    = lk || '0';
+                dislikeBtn.querySelector('span').textContent = dk || '0';
+                likeBtn.classList.toggle('liked',      !!(d.likes    && d.likes[ME]));
+                dislikeBtn.classList.toggle('disliked', !!(d.dislikes && d.dislikes[ME]));
+            });
+        } catch(e) {}
+    }
+
     body.appendChild(row);
 }
 
@@ -981,26 +1038,57 @@ function closeLightbox() {
 }
 </script>
 
-<!-- ── Game overlay (Tic-tac-toe) ────────────────────────────────────────── -->
+<!-- ── Game overlay ───────────────────────────────────────────────────────── -->
 <div class="game-overlay" id="gameOverlay">
   <div class="game-panel">
-    <div class="game-title">⭕❌ Tic-Tac-Toe</div>
-    <div class="game-status" id="gameStatus">Waiting for opponent…</div>
-    <div class="ttt-board" id="tttBoard">
-      <div class="ttt-cell" data-i="0" onclick="tttMove(0)"></div>
-      <div class="ttt-cell" data-i="1" onclick="tttMove(1)"></div>
-      <div class="ttt-cell" data-i="2" onclick="tttMove(2)"></div>
-      <div class="ttt-cell" data-i="3" onclick="tttMove(3)"></div>
-      <div class="ttt-cell" data-i="4" onclick="tttMove(4)"></div>
-      <div class="ttt-cell" data-i="5" onclick="tttMove(5)"></div>
-      <div class="ttt-cell" data-i="6" onclick="tttMove(6)"></div>
-      <div class="ttt-cell" data-i="7" onclick="tttMove(7)"></div>
-      <div class="ttt-cell" data-i="8" onclick="tttMove(8)"></div>
-    </div>
-    <div class="game-btns">
-      <button class="game-btn primary" onclick="tttNewGame()">New Game</button>
+
+    <!-- Game selection menu -->
+    <div id="gameMenu">
+      <div class="game-title">🎮 Choose a Game</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <button class="game-btn primary" style="font-size:16px;" onclick="startGame('ttt')">⭕❌ Tic-Tac-Toe</button>
+        <button class="game-btn primary" style="font-size:16px;" onclick="startGame('rps')">✊✋✌️ Rock Paper Scissors</button>
+      </div>
       <button class="game-btn secondary" onclick="closeGamePanel()">Close</button>
     </div>
+
+    <!-- Tic-Tac-Toe -->
+    <div id="gameTTT" style="display:none">
+      <div class="game-title">⭕❌ Tic-Tac-Toe</div>
+      <div class="game-status" id="gameStatus">Waiting for opponent…</div>
+      <div class="ttt-board" id="tttBoard">
+        <div class="ttt-cell" data-i="0" onclick="tttMove(0)"></div>
+        <div class="ttt-cell" data-i="1" onclick="tttMove(1)"></div>
+        <div class="ttt-cell" data-i="2" onclick="tttMove(2)"></div>
+        <div class="ttt-cell" data-i="3" onclick="tttMove(3)"></div>
+        <div class="ttt-cell" data-i="4" onclick="tttMove(4)"></div>
+        <div class="ttt-cell" data-i="5" onclick="tttMove(5)"></div>
+        <div class="ttt-cell" data-i="6" onclick="tttMove(6)"></div>
+        <div class="ttt-cell" data-i="7" onclick="tttMove(7)"></div>
+        <div class="ttt-cell" data-i="8" onclick="tttMove(8)"></div>
+      </div>
+      <div class="game-btns">
+        <button class="game-btn primary" onclick="tttNewGame()">New Game</button>
+        <button class="game-btn secondary" onclick="_showGameMenu()">← Back</button>
+      </div>
+    </div>
+
+    <!-- Rock Paper Scissors -->
+    <div id="gameRPS" style="display:none">
+      <div class="game-title">✊✋✌️ Rock Paper Scissors</div>
+      <div class="game-status" id="rpsStatus">Start a new round!</div>
+      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
+        <button class="game-btn primary" style="font-size:28px;padding:14px;" onclick="rpsPick('rock')">✊</button>
+        <button class="game-btn primary" style="font-size:28px;padding:14px;" onclick="rpsPick('paper')">✋</button>
+        <button class="game-btn primary" style="font-size:28px;padding:14px;" onclick="rpsPick('scissors')">✌️</button>
+      </div>
+      <div id="rpsResult" style="text-align:center;font-size:14px;margin-bottom:12px;min-height:20px;"></div>
+      <div class="game-btns">
+        <button class="game-btn primary" onclick="rpsNewRound()">New Round</button>
+        <button class="game-btn secondary" onclick="_showGameMenu()">← Back</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1051,29 +1139,105 @@ function _pmFetchLinkPreview(url, container) {
     }).catch(function(){});
 }
 
-// ── Tic-tac-toe ───────────────────────────────────────────────────────────────
+// ── Location sharing ──────────────────────────────────────────────────────────
+function shareLocation() {
+    if (!navigator.geolocation) { alert('Geolocation not supported in this browser.'); return; }
+    navigator.geolocation.getCurrentPosition(function(pos) {
+        var lat = pos.coords.latitude.toFixed(6);
+        var lng = pos.coords.longitude.toFixed(6);
+        var url = 'https://maps.google.com/?q=' + lat + ',' + lng;
+        sendMsg({ message: '📍 My Location: ' + url });
+    }, function() { alert('Location access denied or unavailable.'); });
+}
+
+// ── PM Reactions ──────────────────────────────────────────────────────────────
+function _pmToggleReaction(msgKey, type) {
+    var me = ME;
+    var ref = firebase.database().ref('pm_reactions/' + CHAT_ID + '/' + msgKey);
+    ref.once('value', function(snap) {
+        var d = snap.val() || {};
+        var path = (type === 'like' ? 'likes' : 'dislikes') + '/' + me;
+        var oppPath = (type === 'like' ? 'dislikes' : 'likes') + '/' + me;
+        var already = d[type === 'like' ? 'likes' : 'dislikes'] &&
+                      d[type === 'like' ? 'likes' : 'dislikes'][me];
+        var updates = {};
+        updates[path] = already ? null : true;
+        updates[oppPath] = null; // remove opposite
+        ref.update(updates);
+    });
+}
+
+// ── Games ─────────────────────────────────────────────────────────────────────
 var _tttRef = null;
-var _tttMyMark = '';
+var _rpsRef = null;
+var _gameOpen = false;
 
 function openGamePanel() {
+    _gameOpen = true;
     document.getElementById('gameOverlay').classList.add('show');
-    _tttConnect();
+    document.getElementById('gameNotif').classList.remove('show');
+    _showGameMenu();
+    _listenGameNotif(); // start listening if not already
 }
 function closeGamePanel() {
+    _gameOpen = false;
     document.getElementById('gameOverlay').classList.remove('show');
     if (_tttRef) { _tttRef.off(); _tttRef = null; }
+    if (_rpsRef) { _rpsRef.off(); _rpsRef = null; }
 }
+function _showGameMenu() {
+    document.getElementById('gameMenu').style.display = '';
+    document.getElementById('gameTTT').style.display  = 'none';
+    document.getElementById('gameRPS').style.display  = 'none';
+    if (_tttRef) { _tttRef.off(); _tttRef = null; }
+    if (_rpsRef) { _rpsRef.off(); _rpsRef = null; }
+}
+function startGame(type) {
+    document.getElementById('gameMenu').style.display = 'none';
+    if (type === 'ttt') {
+        document.getElementById('gameTTT').style.display = '';
+        _tttConnect();
+    } else if (type === 'rps') {
+        document.getElementById('gameRPS').style.display = '';
+        _rpsConnect();
+    }
+}
+
+// ── Game invite notification ──────────────────────────────────────────────────
+var _gameNotifRef = null;
+var _lastGameType = '';
+function _listenGameNotif() {
+    if (_gameNotifRef) return; // already listening
+    try {
+        _gameNotifRef = firebase.database().ref('games/' + CHAT_ID);
+        _gameNotifRef.on('value', function(snap) {
+            var g = snap.val();
+            if (!g || _gameOpen) return;
+            var isNewGame = (g.status === 'playing' || g.status === 'choosing') && g.initiator !== ME;
+            if (isNewGame) {
+                var typeName = g.type === 'rps' ? 'Rock Paper Scissors' : 'Tic-Tac-Toe';
+                document.getElementById('gameNotifText').textContent = PEER + ' wants to play ' + typeName + '!';
+                document.getElementById('gameNotif').classList.add('show');
+            }
+        });
+    } catch(e) {}
+}
+
+// ── Tic-Tac-Toe ───────────────────────────────────────────────────────────────
 function _tttConnect() {
     if (_tttRef) _tttRef.off();
     _tttRef = firebase.database().ref('games/' + CHAT_ID);
     _tttRef.on('value', function(snap) {
         var g = snap.val();
-        if (!g) { document.getElementById('gameStatus').textContent = 'Start a new game!'; return; }
+        if (!g || g.type !== 'ttt') {
+            document.getElementById('gameStatus').textContent = 'Start a new game!';
+            return;
+        }
         _tttRender(g);
     });
 }
 function tttNewGame() {
-    var g = { board: ['','','','','','','','',''], X: ME, O: PEER, current: 'X', status: 'playing' };
+    var g = { type:'ttt', board:['','','','','','','','',''], X:ME, O:PEER, current:'X', status:'playing', initiator:ME };
     firebase.database().ref('games/' + CHAT_ID).set(g);
     sendMsg({ message: '🎮 Started a Tic-Tac-Toe game! Open Games in the tray to play.' });
 }
@@ -1083,13 +1247,13 @@ function tttMove(i) {
         var g = snap.val();
         if (!g || g.status !== 'playing') return;
         var mark = g.X === ME ? 'X' : (g.O === ME ? 'O' : '');
-        if (!mark || g.current !== mark) return; // not your turn
-        if (g.board[i]) return; // cell taken
+        if (!mark || g.current !== mark) return;
+        if (g.board[i]) return;
         var board = g.board.slice();
         board[i] = mark;
         var winner = _tttCheckWinner(board);
         var full   = board.every(function(c){ return c !== ''; });
-        var update = { board: board, current: mark === 'X' ? 'O' : 'X' };
+        var update = { board:board, current: mark === 'X' ? 'O' : 'X' };
         if (winner) { update.status = 'won'; update.winner = ME; }
         else if (full) { update.status = 'draw'; }
         _tttRef.update(update);
@@ -1117,6 +1281,68 @@ function _tttRender(g) {
     else if (g.status === 'draw')  statusEl.textContent = "🤝 It's a draw!";
     else if (g.current === myMark) statusEl.textContent = '✅ Your turn (' + (myMark === 'X' ? '❌' : '⭕') + ')';
     else                           statusEl.textContent = '⏳ Waiting for ' + PEER + '…';
+}
+
+// ── Rock Paper Scissors ───────────────────────────────────────────────────────
+var _RPS_EMOJI = { rock:'✊', paper:'✋', scissors:'✌️' };
+var _RPS_WIN   = { rock:'scissors', paper:'rock', scissors:'paper' };
+
+function _rpsConnect() {
+    if (_rpsRef) _rpsRef.off();
+    _rpsRef = firebase.database().ref('games/' + CHAT_ID);
+    _rpsRef.on('value', function(snap) {
+        var g = snap.val();
+        if (!g || g.type !== 'rps') {
+            document.getElementById('rpsStatus').textContent = 'Start a new round!';
+            document.getElementById('rpsResult').textContent = '';
+            return;
+        }
+        _rpsRender(g);
+    });
+}
+function rpsNewRound() {
+    var g = { type:'rps', choices:{}, scores:{}, status:'choosing', initiator:ME, p1:ME, p2:PEER };
+    firebase.database().ref('games/' + CHAT_ID).set(g);
+    sendMsg({ message: '✊✋✌️ Started Rock Paper Scissors! Open Games in the tray to play.' });
+}
+function rpsPick(choice) {
+    var ref = firebase.database().ref('games/' + CHAT_ID);
+    ref.once('value', function(snap) {
+        var g = snap.val();
+        if (!g || g.type !== 'rps' || g.status !== 'choosing') return;
+        if (g.choices && g.choices[ME]) return; // already picked
+        var update = {};
+        update['choices/' + ME] = choice;
+        // check if both picked after this
+        var otherChoice = g.choices ? g.choices[PEER] : null;
+        if (otherChoice) {
+            update['status'] = 'result';
+        }
+        ref.update(update);
+    });
+}
+function _rpsRender(g) {
+    var statusEl = document.getElementById('rpsStatus');
+    var resultEl = document.getElementById('rpsResult');
+    var myChoice = g.choices ? g.choices[ME] : null;
+    var peerChoice = g.choices ? g.choices[PEER] : null;
+
+    if (g.status === 'choosing') {
+        statusEl.textContent = myChoice ? '✅ Waiting for ' + PEER + '…' : 'Pick your move!';
+        resultEl.textContent = myChoice ? 'You chose ' + _RPS_EMOJI[myChoice] : '';
+    } else if (g.status === 'result') {
+        var myE = _RPS_EMOJI[myChoice] || '?';
+        var peerE = _RPS_EMOJI[peerChoice] || '?';
+        resultEl.textContent = 'You: ' + myE + '  vs  ' + PEER + ': ' + peerE;
+        if (!myChoice || !peerChoice) { statusEl.textContent = 'Waiting…'; return; }
+        if (myChoice === peerChoice) {
+            statusEl.textContent = "🤝 It's a tie!";
+        } else if (_RPS_WIN[myChoice] === peerChoice) {
+            statusEl.textContent = '🎉 You win this round!';
+        } else {
+            statusEl.textContent = '😞 ' + PEER + ' wins this round!';
+        }
+    }
 }
 </script>
 
