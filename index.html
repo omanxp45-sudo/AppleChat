@@ -56,21 +56,83 @@
     color: #555;
     margin-bottom: 10px;
 }
-#myUserName, #status {
+#usernameDisplay, #status {
     width: 100%;
     border: 2px solid blue;
     border-radius: 4px;
     padding: 5px 8px;
     margin-top: 4px;
     box-sizing: border-box;
-    /* Prevent iOS zoom on focus */
     font-size: 16px;
     touch-action: manipulation;
 }
-#myUserName { color: red; }
+#usernameDisplay {
+    background: #f0f0f0;
+    color: #555;
+    cursor: not-allowed;
+    font-weight: bold;
+}
+#myUserName {
+    width: 100%;
+    border: 2px solid blue;
+    border-radius: 4px;
+    padding: 5px 8px;
+    margin-top: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+    touch-action: manipulation;
+    color: red;
+}
 label { font-weight: bold; }
 .EnterChatBtn { text-align: center; margin: 15px 0; }
 #statusMsg { text-align: center; font-size: 13px; min-height: 18px; margin-top: 8px; }
+
+/* Google sign-in button */
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 16px;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #3c4043;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+    margin-top: 8px;
+}
+.google-btn:hover { background: #f8f9fa; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+.google-btn:active { background: #f1f3f4; }
+.google-btn img { width: 20px; height: 20px; }
+
+.auth-loading {
+    text-align: center;
+    padding: 50px 20px;
+    color: #666;
+    font-size: 15px;
+}
+.auth-loading .spinner {
+    width: 36px; height: 36px;
+    border: 4px solid #ddd;
+    border-top-color: #b03025;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.signout-bar {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin: 4px auto;
+    width: min(320px, calc(100% - 24px));
+}
+.signout-bar a { color: #b03025; }
 </style>
 </head>
 <body>
@@ -80,27 +142,64 @@ label { font-weight: bold; }
     <span style="font-family: Times New Roman; font-size: 30px; color: red">ApplesChat</span>
 </div>
 
-<div class="userInfoDiv">
-    <!-- Click avatar to change it -->
-    <img alt="Avatar" id="avatar"
-         src="https://imgur.com/PVBYWRJ.png"
-         title="Click to change avatar"
-         onclick="document.getElementById('fileInput').click()">
+<!-- ① Checking auth state -->
+<div id="authLoading" class="auth-loading">
+    <div class="spinner"></div>
+    Checking sign-in…
+</div>
 
-    <p class="avatar-hint">
-        Click avatar to change &nbsp;|&nbsp;
-        <a href="#" onclick="resetAvatar(); return false;">Use Default</a>
+<!-- ② Not signed in -->
+<div id="signInPanel" style="display:none;" class="userInfoDiv">
+    <p style="text-align:center; font-size:14px; margin-bottom:6px; color:#333;">
+        Sign in to get your unique, permanent username.
     </p>
-    <input id="fileInput" type="file" accept="image/*" style="display:none">
+    <p style="text-align:center; font-size:12px; color:#777; margin-bottom:14px;">
+        One Google account = one username, forever.
+    </p>
+    <button class="google-btn" onclick="signInWithGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continue with Google
+    </button>
+    <div id="signInMsg" style="text-align:center; font-size:13px; color:red; margin-top:8px; min-height:18px;"></div>
+</div>
 
+<!-- ③ Signed in but no username yet -->
+<div id="pickerPanel" style="display:none;" class="userInfoDiv">
+    <p style="text-align:center; font-size:14px; margin-bottom:4px;">Choose your username</p>
+    <p style="text-align:center; font-size:12px; color:#c0392b; margin-bottom:12px;">
+        ⚠️ This cannot be changed later
+    </p>
     <label for="myUserName">Username:</label>
     <input id="myUserName"
            type="text"
            placeholder="Letters &amp; numbers only, max 15"
            maxlength="15"
            onkeypress="return avoidSpace(event)">
+    <div id="pickerMsg" style="text-align:center; font-size:13px; min-height:18px; margin-top:8px;"></div>
+    <div style="text-align:center; margin-top:12px;">
+        <button type="button" class="btn btn-success btn-lg" onclick="claimUsername()">
+            Claim Username
+        </button>
+    </div>
+</div>
 
-    <br><br>
+<!-- ④ Signed in with username — full profile -->
+<div id="profilePanel" style="display:none;" class="userInfoDiv">
+    <img alt="Avatar" id="avatar"
+         src="https://imgur.com/PVBYWRJ.png"
+         title="Click to change avatar"
+         onclick="document.getElementById('fileInput').click()">
+    <p class="avatar-hint">
+        Click avatar to change &nbsp;|&nbsp;
+        <a href="#" onclick="resetAvatar(); return false;">Use Default</a>
+    </p>
+    <input id="fileInput" type="file" accept="image/*" style="display:none">
+
+    <label>Username:</label>
+    <input id="usernameDisplay" type="text" readonly title="Username is permanent">
+    <div style="font-size:11px; color:#555; margin-top:3px;">🔒 Permanent — cannot be changed</div>
+
+    <br>
 
     <label for="status">Status:</label>
     <input id="status"
@@ -111,13 +210,22 @@ label { font-weight: bold; }
     <div id="statusMsg"></div>
 </div>
 
-<div class="EnterChatBtn">
+<!-- ⑤ Enter button -->
+<div id="enterBtnDiv" style="display:none;" class="EnterChatBtn">
     <button type="button" class="btn btn-primary btn-lg" onclick="enterChat()">
         <img src="https://imgur.com/57AweD4.png" style="width:20px;height:20px" alt="">
         Enter ApplesChat
     </button>
 </div>
 
+<!-- Sign-out bar (shown when authenticated) -->
+<div id="signOutBar" style="display:none;" class="signout-bar">
+    Signed in as <b id="googleEmailDisplay"></b>
+    &nbsp;|&nbsp;
+    <a href="#" onclick="doSignOut(); return false;">Sign Out</a>
+</div>
+
+<!-- Visitor stats -->
 <div style="text-align:center; margin: 10px auto; font-size:13px; color:#555; width:min(320px,calc(100% - 24px));">
     <span>👥 Today: <b id="todayCount">…</b></span>
     &nbsp;|&nbsp;
@@ -127,10 +235,12 @@ label { font-weight: bold; }
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 
 <script>
     var DEFAULT_AVATAR = 'https://imgur.com/PVBYWRJ.png';
+    var _authUser = null;
 
     // ── Visitor stats ─────────────────────────────────────────────────────────
     function trackVisitor() {
@@ -151,26 +261,109 @@ label { font-weight: bold; }
         } catch(e) {}
     }
 
-    // ── Restore saved values ──────────────────────────────────────────────────
-    window.onload = function () {
-        document.getElementById('myUserName').value = localStorage.getItem('myUserName') || '';
-        document.getElementById('status').value     = localStorage.getItem('status')     || '';
-        trackVisitor();
+    // ── Panel switcher ────────────────────────────────────────────────────────
+    function showPanel(which) {
+        ['authLoading','signInPanel','pickerPanel','profilePanel'].forEach(function(id) {
+            document.getElementById(id).style.display = (id === which) ? '' : 'none';
+        });
+        var hasUser = (which === 'pickerPanel' || which === 'profilePanel');
+        document.getElementById('enterBtnDiv').style.display  = (which === 'profilePanel') ? '' : 'none';
+        document.getElementById('signOutBar').style.display   = hasUser ? '' : 'none';
+    }
 
-        var savedAvatar = localStorage.getItem('avatarImgData');
-        if (savedAvatar) document.getElementById('avatar').src = savedAvatar;
+    // ── Auth state listener ───────────────────────────────────────────────────
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) {
+            _authUser = null;
+            showPanel('signInPanel');
+            return;
+        }
+        _authUser = user;
+        document.getElementById('googleEmailDisplay').textContent = user.email;
 
-        // File-picker → resize to 60×60 JPEG → store in localStorage
-        document.getElementById('fileInput').onchange = function () {
-            var file = this.files[0];
-            if (!file) return;
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                resizeAndStore(e.target.result);
-            };
-            reader.readAsDataURL(file);
-        };
-    };
+        // Check if this Google UID already has a claimed username
+        firebase.database().ref('uid_map/' + user.uid).once('value', function(snap) {
+            if (snap.exists() && snap.val().username) {
+                var username = snap.val().username;
+                localStorage.setItem('myUserName', username);
+                document.getElementById('usernameDisplay').value = username;
+                document.getElementById('status').value = localStorage.getItem('status') || '';
+                var savedAvatar = localStorage.getItem('avatarImgData');
+                if (savedAvatar) document.getElementById('avatar').src = savedAvatar;
+                showPanel('profilePanel');
+            } else {
+                showPanel('pickerPanel');
+            }
+        }, function() {
+            // Firebase read failed — fall back to sign-in panel
+            showPanel('signInPanel');
+        });
+    });
+
+    // ── Google Sign-In ────────────────────────────────────────────────────────
+    function signInWithGoogle() {
+        var provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider).catch(function(err) {
+            document.getElementById('signInMsg').textContent = err.message;
+        });
+    }
+
+    // ── Sign Out ──────────────────────────────────────────────────────────────
+    function doSignOut() {
+        firebase.auth().signOut();
+        // Don't remove myUserName from localStorage — it's still valid,
+        // just require sign-in again on next visit.
+    }
+
+    // ── Block spaces in username ──────────────────────────────────────────────
+    function avoidSpace(e) {
+        return (e.which || e.keyCode) !== 32;
+    }
+
+    function setPickerMsg(text, color) {
+        var el = document.getElementById('pickerMsg');
+        el.style.color = color || '#555';
+        el.textContent = text;
+    }
+
+    // ── Claim a new username (first-time users) ───────────────────────────────
+    function claimUsername() {
+        if (!_authUser) return;
+        var username = document.getElementById('myUserName').value.trim();
+        if (!/^[A-Za-z0-9]{1,15}$/.test(username)) {
+            setPickerMsg('1–15 letters/numbers, no spaces.', 'red');
+            document.getElementById('myUserName').focus();
+            return;
+        }
+        setPickerMsg('Checking availability…');
+
+        // username_map/{username} holds the UID that owns it — if it exists, taken
+        firebase.database().ref('username_map/' + username).once('value', function(snap) {
+            if (snap.exists()) {
+                setPickerMsg('"' + username + '" is already taken. Choose another.', 'red');
+                document.getElementById('myUserName').focus();
+            } else {
+                // Claim atomically: write both directions at once
+                var updates = {};
+                updates['uid_map/' + _authUser.uid]       = { username: username };
+                updates['username_map/' + username]        = { uid: _authUser.uid };
+                firebase.database().ref().update(updates, function(err) {
+                    if (err) {
+                        setPickerMsg('Error saving: ' + err.message, 'red');
+                    } else {
+                        localStorage.setItem('myUserName', username);
+                        document.getElementById('usernameDisplay').value = username;
+                        document.getElementById('status').value = localStorage.getItem('status') || '';
+                        var savedAvatar = localStorage.getItem('avatarImgData');
+                        if (savedAvatar) document.getElementById('avatar').src = savedAvatar;
+                        showPanel('profilePanel');
+                    }
+                });
+            }
+        }, function(err) {
+            setPickerMsg('Firebase error: ' + err.message, 'red');
+        });
+    }
 
     // ── Resize image to 60×60 and save to localStorage ────────────────────────
     function resizeAndStore(dataUrl) {
@@ -193,48 +386,28 @@ label { font-weight: bold; }
         document.getElementById('avatar').src = DEFAULT_AVATAR;
     }
 
-    // ── Block spaces in username ──────────────────────────────────────────────
-    function avoidSpace(e) {
-        return (e.which || e.keyCode) !== 32;
-    }
-
-    function setMsg(text, color) {
-        var el = document.getElementById('statusMsg');
-        el.style.color   = color || '#555';
-        el.textContent   = text;
-    }
-
-    // ── Validate → save to Firebase → go to chat ─────────────────────────────
+    // ── Enter chat ────────────────────────────────────────────────────────────
     function enterChat() {
-        var username = document.getElementById('myUserName').value.trim();
+        var username = document.getElementById('usernameDisplay').value;
         var status   = document.getElementById('status').value.trim();
         var avatar   = localStorage.getItem('avatarImgData') || DEFAULT_AVATAR;
 
-        if (!/^[A-Za-z0-9]{1,15}$/.test(username)) {
-            setMsg('Username must be 1–15 letters/numbers, no spaces.', 'red');
-            document.getElementById('myUserName').focus();
-            return;
-        }
+        if (!username) return;
 
-        // Save locally
-        localStorage.setItem('myUserName', username);
-        localStorage.setItem('status',     status);
+        localStorage.setItem('status', status);
 
-        setMsg('Connecting…');
+        var el = document.getElementById('statusMsg');
+        el.style.color = '#555';
+        el.textContent = 'Connecting…';
 
-        // Save profile to Firebase, then redirect.
-        // Wrapped in try-catch so a misconfigured Firebase never blocks entry.
         try {
-            var db = firebase.database();
-            db.ref('users/' + username).set({
+            firebase.database().ref('users/' + username).set({
                 username:  username,
                 status:    status,
                 avatar:    avatar,
                 lastSeen:  firebase.database.ServerValue.TIMESTAMP
             })
-            .then(function () {
-                window.location.href = 'ApplesChat.html';
-            })
+            .then(function () { window.location.href = 'ApplesChat.html'; })
             .catch(function (err) {
                 console.warn('Firebase write failed:', err.message);
                 window.location.href = 'ApplesChat.html';
@@ -245,9 +418,24 @@ label { font-weight: bold; }
         }
     }
 
-    // Allow Enter key to submit
+    // ── Page ready ────────────────────────────────────────────────────────────
+    window.onload = function () {
+        trackVisitor();
+
+        document.getElementById('fileInput').onchange = function () {
+            var file = this.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) { resizeAndStore(e.target.result); };
+            reader.readAsDataURL(file);
+        };
+    };
+
+    // ── Enter key support ─────────────────────────────────────────────────────
     document.addEventListener('keyup', function (e) {
-        if (e.keyCode === 13) enterChat();
+        if (e.keyCode !== 13) return;
+        if (document.getElementById('pickerPanel').style.display  !== 'none') claimUsername();
+        if (document.getElementById('profilePanel').style.display !== 'none') enterChat();
     });
 </script>
 
