@@ -2395,11 +2395,9 @@ html.dark-mode, body.dark-mode {
     </div>
 </div>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="firebase-config.js"></script>
+<!-- Socket.io + Firebase-compat shim -->
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="/socket-shim.js"></script>
 
 <script>
 // ── Page init ─────────────────────────────────────────────────────────────────
