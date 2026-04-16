@@ -1768,8 +1768,11 @@ html.dark-mode, body.dark-mode {
     cursor: pointer; transition: background 0.12s; text-decoration: none; text-align: center;
     display: block;
 }
-.contact-action-btn.call  { background: rgba(37,211,102,0.15); color: #16a34a; }
-.contact-action-btn.email { background: rgba(13,110,253,0.12); color: #0d6efd; }
+.contact-action-btn.call   { background: rgba(37,211,102,0.15); color: #16a34a; }
+.contact-action-btn.email  { background: rgba(13,110,253,0.12); color: #0d6efd; }
+.contact-action-btn.save   { background: rgba(255,152,0,0.13);  color: #e65100; }
+.contact-action-btn.copy   { background: rgba(100,100,100,0.1); color: #555; }
+.dark-mode .contact-action-btn.copy { color: #bbb; }
 
 /* Audio file card */
 .audio-header { background: rgba(156,39,176,0.12); color: #7b1fa2; }
@@ -1880,6 +1883,7 @@ html.dark-mode, body.dark-mode {
         <button class="header-settings-btn" onclick="openRoomsPanel()" title="Rooms">🌍</button>
         <button class="header-settings-btn" onclick="openFriendsModal()" title="Friends">👥</button>
         <button class="header-settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
+        <button class="header-settings-btn" onclick="acSignOut()" title="Sign Out">🚪</button>
         <a class="header-user" href="index.html" title="Edit profile">
             <img class="header-avatar" id="avatar" src="https://i.imgur.com/PVBYWRJ.png" alt="Avatar">
             <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-start;">
@@ -2394,6 +2398,7 @@ html.dark-mode, body.dark-mode {
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="firebase-config.js"></script>
 
 <script>
@@ -2819,6 +2824,28 @@ function appendMessage(msg) {
         if (sub2.length) $info.append($('<div class="card-sub">').html(sub2.join('<br>')));
         $body.append($info);
         $card.append($body);
+        // Action buttons row
+        var $acts = $('<div class="contact-action-row" style="margin-top:10px;">');
+        if (msg.contact_phone) {
+            $acts.append($('<a class="contact-action-btn call">').attr('href', 'tel:' + msg.contact_phone).text('📞 Call'));
+        }
+        if (msg.contact_email) {
+            $acts.append($('<a class="contact-action-btn email">').attr('href', 'mailto:' + msg.contact_email).text('✉ Email'));
+        }
+        (function(n, p, e) {
+            var $save = $('<button class="contact-action-btn save">').text('💾 Save');
+            $save.on('click', function() { saveContactVCard(n, p, e); });
+            $acts.append($save);
+            var $copy = $('<button class="contact-action-btn copy">').text('📋 Copy');
+            $copy.on('click', function() {
+                var txt = n + (p ? '\n' + p : '') + (e ? '\n' + e : '');
+                navigator.clipboard.writeText(txt).then(function() {
+                    $copy.text('✓ Copied'); setTimeout(function(){ $copy.text('📋 Copy'); }, 1500);
+                });
+            });
+            $acts.append($copy);
+        })(msg.contact_name, msg.contact_phone || '', msg.contact_email || '');
+        $card.append($acts);
         $bubble.append($card);
         isMedia = false;
     } else if (msg.audio_file_data) {
@@ -3135,6 +3162,22 @@ async function pickFromAddressBook() {
     } catch (err) {
         console.warn('Contact picker error:', err);
     }
+}
+
+function saveContactVCard(name, phone, email) {
+    var vcard = 'BEGIN:VCARD\r\nVERSION:3.0\r\nFN:' + name + '\r\n';
+    if (phone) vcard += 'TEL;TYPE=CELL:' + phone + '\r\n';
+    if (email) vcard += 'EMAIL:' + email + '\r\n';
+    vcard += 'END:VCARD';
+    var blob = new Blob([vcard], { type: 'text/vcard' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href     = url;
+    a.download = name.replace(/\s+/g, '_') + '.vcf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 function sendContact() {
@@ -3940,6 +3983,13 @@ function _fetchLinkPreview(url, $bubble) {
         $card.append($info);
         $bubble.append($card);
     }).catch(function(){});
+}
+
+// ── Sign Out ──────────────────────────────────────────────────────────────────
+function acSignOut() {
+    if (!confirm('Sign out of ApplesChat?')) return;
+    try { firebase.auth().signOut(); } catch(e) {}
+    window.location.href = 'index.html';
 }
 
 // ── Friends ───────────────────────────────────────────────────────────────────
